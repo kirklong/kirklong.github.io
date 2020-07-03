@@ -708,6 +708,10 @@ input[type="radio"] + label:before {
 
 	}
 
+.movie {
+    max-width:1000px;
+}
+
 /* List */
 
 ol {
