@@ -736,7 +736,7 @@ input[type="radio"] + label:before {
 	}
 
 	.movie.left, .movie.right {
-		max-width: 100%;
+		max-width: 40%;
 	}
 
 		.movie.left mov, .movie.right mov {
