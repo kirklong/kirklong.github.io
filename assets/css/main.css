@@ -775,7 +775,7 @@ input[type="radio"] + label:before {
 			width: 100%;
 		}
 
-	@media screen and (max-width: 780px) {
+	@media screen and (max-width: 480px) {
 
 		.movie.main {
 			margin: 2rem 0;
