@@ -740,7 +740,7 @@ input[type="radio"] + label:before {
 	}
 
 		.movie.left mov, .movie.right mov {
-			width: 100%;
+			width: 40%;
 		}
 
 	.movie.left {
@@ -762,17 +762,17 @@ input[type="radio"] + label:before {
 	}
 
 		.movie.fit mov {
-			width: 100%;
+			width: 40%;
 		}
 
 	.movie.main {
 		display: block;
 		margin: 2.5rem 0;
-		width: 100%;
+		width: 40%;
 	}
 
 		.movie.main mov {
-			width: 100%;
+			width: 40%;
 		}
 
 	@media screen and (max-width: 736px) {
