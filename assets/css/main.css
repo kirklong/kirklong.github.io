@@ -709,87 +709,8 @@ input[type="radio"] + label:before {
 	}
 
 .movie {
-	border-radius: 4px;
-	border: 0;
-	display: inline-block;
-	position: relative;
+	max-width:1000px;
 }
-
-	.movie:before {
-		pointer-events: none;
-		background-image: url("../../images/overlay.png");
-		background-color: rgba(19, 21, 25, 0.5);
-		border-radius: 4px;
-		content: '';
-		display: block;
-		height: 100%;
-		left: 0;
-		opacity: 0.5;
-		position: absolute;
-		top: 0;
-		width: 100%;
-	}
-
-	.movie mov {
-		border-radius: 4px;
-		display: block;
-	}
-
-	.movie.left, .movie.right {
-		max-width: 40%;
-	}
-
-		.movie.left mov, .movie.right mov {
-			width: 100%;
-		}
-
-	.movie.left {
-		float: left;
-		padding: 0 1.5em 1em 0;
-		top: 0.25em;
-	}
-
-	.movie.right {
-		float: right;
-		padding: 0 0 1em 1.5em;
-		top: 0.25em;
-	}
-
-	.movie.fit {
-		display: block;
-		margin: 0 0 2rem 0;
-		width: 100%;
-	}
-
-		.movie.fit mov {
-			width: 100%;
-		}
-
-	.movie.main {
-		display: block;
-		margin: 2.5rem 0;
-		width: 100%;
-	}
-
-		.movie.main mov {
-			width: 100%;
-		}
-
-	@media screen and (max-width: 736) {
-
-		.movie.main {
-			margin: 2rem 0;
-		}
-
-	}
-
-	@media screen and (max-width: 480px) {
-
-		.movie.main {
-			margin: 1.5rem 0;
-		}
-
-	}
 
 /* List */
 
