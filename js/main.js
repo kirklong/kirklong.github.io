@@ -116,10 +116,9 @@ function loadPost(loadURL){
       url: loadURL, // URL HERE
       type: 'GET',
       success: function(html) {
-
         var $lis = $(html).find('#blogPost'); // Loads the content inside #blogPost div
-
         $("#postHere").html($lis);
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, "#postHere"]);
     }
   });
 }
