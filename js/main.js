@@ -132,6 +132,9 @@ $(".loadPost").on('click', function(event){
   $('#page-blog-single').addClass('section-page-active');
   pageOn();
   loadPost(loadURL);
+  $('html,body').animate({
+    scrollTop: $($(this).attr('href')).offset().top
+  },2000);
 });
 
 //==============___Contact Form Validator and Ajax Sender___================
