@@ -7,7 +7,7 @@ $(window).load(function(){
 
 
 	//==============___Page Loader___================
-  
+
   $('#page-loader').delay(300).fadeOut(400, function(){
 
   });
@@ -28,12 +28,12 @@ $(document).ready(function(){
  $("#testimonial-carousel").owlCarousel({
     navigation : false, // Show next and prev buttons
     slideSpeed : 300,
-    paginationSpeed : 400,      
+    paginationSpeed : 400,
     responsiveRefreshRate : 200,
     responsiveBaseWidth: window,
     pagination: true,
-    singleItem: true,    
-    navigationText: ["<span class='fa fa-chevron-left'></span>","<span class='fa fa-chevron-right'></span>"],     
+    singleItem: true,
+    navigationText: ["<span class='fa fa-chevron-left'></span>","<span class='fa fa-chevron-right'></span>"],
   });
 
 
@@ -63,10 +63,10 @@ var linkPage = '';
 
 function pageOn(){
     $('#main-menu').addClass('main-menu-pgactive');
-    $('#section-home').addClass('section-vcardbody-pgactive');    
-    $('.profileActive').removeClass('profileActive');    
+    $('#section-home').addClass('section-vcardbody-pgactive');
+    $('.profileActive').removeClass('profileActive');
     $('#profile2').addClass('profileActive');
-    
+
     linkHome = 1;
 }
 
@@ -82,7 +82,7 @@ function pageOff(){
 
 $(".link-page").on('click', function(event){
   event.preventDefault();
-  $('.menuActive').removeClass('menuActive');  
+  $('.menuActive').removeClass('menuActive');
   $(this).addClass('menuActive');
   linkPage = $(this).attr('href');
   $('.section-page-active').removeClass('section-page-active');
@@ -101,7 +101,7 @@ $(".link-home").on('click', function(event){
     $('.menuActive').removeClass('menuActive');
     $(this).addClass('menuActive');
     pageOff();
-  }  
+  }
 });
 
 //==============___Blog - Ajax___================
@@ -150,8 +150,8 @@ $(".loadPost").on('click', function(event){
               .blur()
               .closest(".control-group")
               .removeClass("success")
-              .removeClass("error");              
-            
+              .removeClass("error");
+
           } else {
             $("#contactError").fadeIn(300);
             $("#contactSuccess").addClass("hidden");
@@ -166,7 +166,7 @@ $(".loadPost").on('click', function(event){
 //Modal for Contact Form
 $('.modal-wrap').click(function(){
   $('.modal-wrap').fadeOut(300);
-});   
+});
 
 //End - Document Ready
 });
