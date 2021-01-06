@@ -106,9 +106,9 @@ $(".link-home").on('click', function(event){
 });
 
 //==============___Blog - Ajax___================
-function loadPost(){
+function loadPost(loadURL){
    $.ajax({
-      url: 'single.html', // URL HERE
+      url: loadURL, // URL HERE
       type: 'GET',
       success: function(html) {
 
@@ -120,12 +120,13 @@ function loadPost(){
 }
 
 $(".loadPost").on('click', function(event){
+  var loadURL=event.target.href;
   event.preventDefault();
   //$("#postHere").html('loading...');
   $('.section-page-active').removeClass('section-page-active');
   $('#page-blog-single').addClass('section-page-active');
   pageOn();
-  loadPost();
+  loadPost(loadURL);
 });
 
 //==============___Contact Form Validator and Ajax Sender___================
