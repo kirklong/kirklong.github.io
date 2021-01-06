@@ -33,7 +33,7 @@ Primary use:  Vcard / Personal / CV / Resume / Portfolio
 ! 01. MIXINS / VARIABLES
 ==============	=========================================== */
 .color1 {
-  color: #3D428B;
+  color: #08aeac;
 }
 .color2 {
   color: #021533;
@@ -86,7 +86,7 @@ a:focus {
 .btn {
   font-weight: bold;
   color: #ffffff;
-  background: #3D428B;
+  background: #08aeac;
   border-radius: 0;
   font-size: 12px;
   padding: 10px 20px;
@@ -191,7 +191,7 @@ iframe {
   width: 100%;
   height: 100%;
   background: #008c8a;
-  color: #3D428B;
+  color: #08aeac;
   opacity: 0.99;
   position: fixed;
   top: 0;
@@ -381,7 +381,7 @@ iframe {
 }
 .footer-social-icons a:hover {
   color: #ffffff;
-  background: #3D428B;
+  background: #08aeac;
 }
 /* ==========================================================
 ! 06. SECTION: vCard Body
@@ -539,7 +539,7 @@ iframe {
 }
 .main-menu-list a {
   display: block;
-  background: #3D428B;
+  background: #08aeac;
   padding: 10px;
   color: #ffffff;
   text-transform: uppercase;
@@ -657,7 +657,7 @@ iframe {
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
   padding: 10px;
-  background: url('../img/bg-btn.png') no-repeat center center #3D428B;
+  background: url('../img/bg-btn.png') no-repeat center center #08aeac;
 }
 .vcard-profile-description-ft-item p {
   margin-bottom: 0;
@@ -680,7 +680,7 @@ iframe {
 }
 .section-title2 {
   font-weight: bold;
-  color: #3D428B;
+  color: #08aeac;
   font-size: 20px;
   line-height: 24px;
   letter-spacing: -1px;
@@ -688,7 +688,7 @@ iframe {
   padding-left: 15px;
   padding-top: 5px;
   padding-bottom: 5px;
-  border-left: 4px solid #3D428B;
+  border-left: 4px solid #08aeac;
 }
 .resume-item {
   padding: 15px;
@@ -786,7 +786,7 @@ iframe {
   font-weight: bold;
 }
 .testimonial-content {
-  background: url('../img/bgmask2.png') no-repeat center center #3D428B;
+  background: url('../img/bgmask2.png') no-repeat center center #08aeac;
   color: #ffffff;
   padding: 20px;
   border-radius: 10px;
@@ -813,7 +813,7 @@ iframe {
   -o-transform: rotate(45deg);
   transform: rotate(45deg);
   z-index: 888;
-  background: #3D428B;
+  background: #08aeac;
 }
 .testimonial-picture {
   width: 110px;
@@ -994,7 +994,7 @@ iframe {
   margin-bottom: 40px;
 }
 .progress-bar {
-  background: #3D428B;
+  background: #08aeac;
   width: 20%;
 }
 .progress-bar-2 {
@@ -1195,7 +1195,7 @@ span.see-more {
   padding-left: 10px;
   padding-right: 10px;
   color: #ffffff;
-  background: #3D428B;
+  background: #08aeac;
   font-weight: bold;
   -webkit-transition: all 0.2s;
   -moz-transition: all 0.2s;
@@ -1240,7 +1240,7 @@ span.see-more {
   line-height: 23px;
 }
 .blog-comments-title {
-  border-bottom: 1px dotted #3D428B;
+  border-bottom: 1px dotted #08aeac;
   padding-bottom: 10px;
   margin-bottom: 10px;
 }
@@ -1280,7 +1280,7 @@ span.see-more {
   margin-bottom: 20px;
   margin-top: 40px;
   font-size: 18px;
-  color: #3D428B;
+  color: #08aeac;
 }
 .media-heading {
   font-weight: bold;
@@ -1334,14 +1334,14 @@ span.see-more {
 ! 17. SECTION: Contact
 ========================================================== */
 .contact-subtitle-1 {
-  color: #3D428B;
+  color: #08aeac;
   font-size: 14px;
   letter-spacing: -1px;
   font-weight: bold;
   margin-bottom: 8px;
   margin-top: 25px;
   padding-bottom: 5px;
-  border-bottom: 1px dotted #3D428B;
+  border-bottom: 1px dotted #08aeac;
 }
 .contact-subtitle-1:first-child {
   margin-top: 0;
