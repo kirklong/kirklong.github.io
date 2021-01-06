@@ -66,7 +66,8 @@ function pageOn(){
     $('#section-home').addClass('section-vcardbody-pgactive');
     $('.profileActive').removeClass('profileActive');
     $('#profile2').addClass('profileActive');
-
+    var element =  document.getElementById("#section-home");
+    element.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
     linkHome = 1;
 }
 
