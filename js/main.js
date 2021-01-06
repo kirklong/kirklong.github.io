@@ -90,7 +90,7 @@ $(".link-page").on('click', function(event){
   linkPage = $(this).attr('href');
   $('html,body').animate({
     scrollTop: $(linkPage).offset().top
-  },2000);
+  },500);
   $('.section-page-active').removeClass('section-page-active');
   $(linkPage).addClass('section-page-active');
   pageOn();
@@ -134,7 +134,7 @@ $(".loadPost").on('click', function(event){
   loadPost(loadURL);
   $('html,body').animate({
     scrollTop: $($(this).attr('href')).offset().top
-  },2000);
+  },500);
 });
 
 //==============___Contact Form Validator and Ajax Sender___================
