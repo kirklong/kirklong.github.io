@@ -66,6 +66,7 @@ function pageOn(){
     $('#section-home').addClass('section-vcardbody-pgactive');
     $('.profileActive').removeClass('profileActive');
     $('#profile2').addClass('profileActive');
+    window.location.hash=
     // var element =  document.getElementById("#section-home");
     // element.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
     linkHome = 1;
@@ -83,9 +84,13 @@ function pageOff(){
 
 $(".link-page").on('click', function(event){
   event.preventDefault();
+
   $('.menuActive').removeClass('menuActive');
   $(this).addClass('menuActive');
   linkPage = $(this).attr('href');
+  $('html,body').animate({
+    scrollTop: $(linkPage).offset().top
+  },2000);
   $('.section-page-active').removeClass('section-page-active');
   $(linkPage).addClass('section-page-active');
   pageOn();
