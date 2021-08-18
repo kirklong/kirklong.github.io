@@ -1454,7 +1454,7 @@ span.see-more {
 ! 19. Kirk additions
 ========================================================== */
 
-.video {
+.blog-single-content video {
   width: 100% !important;
   height: auto !important;
 }
