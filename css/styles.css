@@ -1393,6 +1393,7 @@ span.see-more {
     overflow-x: hidden;
   }
 }
+/* trying to hide on mobile */
 @media screen and (max-width: 600px){
   .vcard-header-single {
     visibility: hidden;
@@ -1418,6 +1419,119 @@ span.see-more {
     width: 28%;
     display: none;
     }
+  .blog-single-content p {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  .blog-comments-title {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  .post-header-image img {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  .blog-single-title {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  .blog-single-title a {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  .blog-single-title a:hover {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  /*! Blog Comments */
+  .blog-comments-title {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  .media-heading {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  .media-heading small {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  .media-body {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  .well {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  .blog-comments > .media {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  .media {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+  .media img {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
 }
 @media (min-width: 1400px) {
   .vcard-header-single {
