@@ -1134,6 +1134,33 @@ span.see-more {
 /* ==========================================================
 ! 14. BLOG
 ========================================================== */
+@media screen and (max-width: 600px){
+  .blog-item {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+    }
+  .blog-item-wrapper {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+    }
+  .section-pagination a {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+    }
+}
+
 .blog-item {
   margin-bottom: 15px;
   padding: 9px;
