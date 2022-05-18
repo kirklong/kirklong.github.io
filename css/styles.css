@@ -1244,6 +1244,24 @@ span.see-more {
     overflow-x: hidden;
   }
 }
+@media screen and (max-width: 600px){
+  .vcard-header-single {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+    }
+  .blog-single-post {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+    }
+}
 @media (min-width: 1400px) {
   .vcard-header-single {
     top: 180px;
