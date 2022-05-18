@@ -1410,6 +1410,14 @@ span.see-more {
     width: 28%;
     display: none;
     }
+  .post-header-image {
+    visibility: hidden;
+    clear: both;
+    float: left!important;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+    }
 }
 @media (min-width: 1400px) {
   .vcard-header-single {
