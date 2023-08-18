@@ -448,14 +448,14 @@ iframe {
   }
 }
 .section-vcardbody-pgactive {
-  left: 15%;
+  left: 0%;
 }
 @media (min-width:992px) {
   .section-page-single {
-    left: 15%;
-    transform: translateY(-90%);
-    -moz-transform: translateY(-90%);
-    -webkit-transform: translateY(-90%);
+    left: 0%;
+    transform: translateY(-100%);
+    -moz-transform: translateY(-100%);
+    -webkit-transform: translateY(-100%);
     visibility: hidden;
     padding: 20px;
     padding-top: 0px;
@@ -471,7 +471,7 @@ iframe {
   .page-mask {
     position: absolute;
     top: 80%;
-    left: 10%;
+    left: 0%;
     display: block;
     width: 99%;
     height: 20px;
@@ -484,14 +484,14 @@ iframe {
   }
 }
 .page-mask-active {
-  left: 65%;
+  left: 50%;
   opacity: 1;
   margin-left: 10px;
 }
 .section-page-active {
   opacity: 1;
   z-index: 22;
-  left: 65%;
+  left: 50%;
   visibility: visible;
   transform: translateY(0px);
   -moz-transform: translateY(0px);
@@ -538,7 +538,7 @@ iframe {
   }
 }
 .main-menu-pgactive {
-  left: 0%;
+  left: -15%;
 }
 .main-menu-list {
   margin: 0;
