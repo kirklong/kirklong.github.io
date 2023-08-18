@@ -1238,7 +1238,7 @@ span.see-more {
 @media (min-width:992px) {
   .vcard-header-single {
     width: 50%;
-    left: 0%;
+    left: 25%;
     position: absolute;
     top: 180px;
     overflow-x: hidden;
