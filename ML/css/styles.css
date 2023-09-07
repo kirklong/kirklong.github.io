@@ -4,9 +4,7 @@
 /* tab class */
 .tabs {
     overflow: hidden;
-    background-color: #65c9f7;
     font-family: Arial;
-    width: 100%;
 }
 
 /* tab links */
@@ -17,6 +15,7 @@
     padding: 14px 16px;
     text-decoration: none;
     font-size: 17px;
+    background-color: #65c9f7;
 }
 
 /* change color of links on hover */
