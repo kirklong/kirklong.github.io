@@ -3,8 +3,10 @@
 <head>
     <title>Machine Learning Project</title>
     <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link href="css/prism.css" rel="stylesheet" />
 </head>
 <body>
+    <script src="js/prism.js"></script>
     <div class="banner">
         <h1>Machine Learning Project</h1>
         <div class="tabs">
@@ -22,9 +24,108 @@
     </div>
     <div class="content">
         <h2>DataPrep/EDA</h2>
+        <h3>Observational data</h3>
         <p>
-            Lorem Ipsum dolor...
+            There are a variety of public astrophysics datasets available, but perhaps the best / most consistent for large amounts of observational data comes from the <a href="https://www.sdss.org/">Sloan Digital Sky Survey (SDSS)</a>. 
+            SDSS first began taking data in 2000, and has since released 18 data releases (DR) of data. It has imaged over 1/3 of the sky and contains photometric observations of around 1 billion objects, with more detailed spectral observations of more than 4 million objects.
+            The size, consistency, and quality of the data makes it an ideal dataset for machine learning applications. To address the questions posed in the <a href="HomePageIntro.html">Introduction</a>, we will obtain quasar, galaxy, and star data from SDSS, using the most recent data release (DR18).
         </p>
+        <p>Fortunately, SDSS makes all of their data publicly accessible through a variety of APIs. The SDSS database can be accessed through <a href="https://skyserver.sdss.org/">SkyServer</a>. 
+            We can query the database programmatically using SQL syntax from the <a href="https://skyserver.sdss.org/dr18/SkyServerWS/SearchTools/SqlSearch?">https://skyserver.sdss.org/dr18/SkyServerWS/SearchTools/SqlSearch?</a> endpoint.
+            SDSS data releases are cumulative, so we can query the database for all objects SDSS has ever observed by accessing the "dr18" folder. From there we must tell the server that we are looking to use the SQLSearch tool on SkyServer, information which is contained in the latter half of the URL.
+            To successfully query the database, we must provide a valid SQL query with the "cmd" parameter. For example, to obtain the locations on the sky of the first 10 stars in the database we would construct the following SQL query:
+            <pre><code class="language-SQL">
+SELECT TOP 10
+p.ra,p.dec
+FROM PhotoObj AS p
+    JOIN SpecObj AS s ON s.bestobjid = p.objid
+WHERE
+    s.class = 'STAR'
+            </code></pre>
+            This query selects the right ascension (ra) and declination (dec) for the first 10 stars in the database, as these parameters are astronomical coordinates that point to the location of an object on the sky. 
+            The "PhotoObj" table contains all the photometric information for each object (including where the telescope was pointing) but to distinguish between objects we often need spectra, whose information we can obtain from the "SpecObj" table.
+            The "SpecObj" table thus contains the critical information on whether the imaged object is likely a star or not, which is why we join the two tables on the "bestobjid" and "objid" columns.
+            </p>
+            <p>
+            But we're not done yet. To actually get the data, we must send a GET request to the URL with the SQL query as a parameter, and to do this we have to reformat things a little bit. To format this correctly for our request, 
+            we have to replace many of the characters in the query with their URL encoded equivalents. For example, spaces become "%20", and the equals sign becomes "%3D". 
+            We also need to tell the server what kind of format we would like our output in by appending the "&format=" parameter, and if we want to give the resulting table a name via the "&name=" parameter. It's best not to hard-code the number of objects to return either, but we can set up our function to allow this as a free parameter we can change.
+            We can accomplish these tasks in Python with the help of regex (via the "re" module), executing the final GET 
+            request using "wget" from the command line (which we access with the "os" module in Python). The following function takes a SQL query like the one above, reformats it and combines it with the SkyServer endpoint to form a functional URL, then executes the GET request in the terminal to actually obtain the data, returning the URL for debugging:
+            <pre><code class="language-python">
+import os, re
+def getObjTable(SQL_query, format="csv", fname="queryResults", TableName="",N=100000):
+    """Retrieve table of N SDSS objects using SQL query
+    params: SQL_query [str] - SQL query to be executed
+            format [str] - format of table, options are 'csv', 'html', 'xml', 'json'
+            TableName [str] - name of table, default is empty string
+            N [int] - number of objects to retrieve, default is 100000, limit is 500000
+    returns: query [str] - url of reformatted query, downloaded with wget and saved as {fname}.{format}
+    """
+    SQL_query = SQL_query.format(N)
+    base_url = "https://skyserver.sdss.org/dr18/SkyServerWS/SearchTools/SqlSearch?cmd="
+    SQL_formatted = re.sub(r"\n", "%0D%0A", SQL_query)
+    SQL_formatted = re.sub(r"\+", "%2B", SQL_formatted)
+    SQL_formatted = re.sub(r"\s", "+", SQL_formatted)
+    SQL_formatted = re.sub(r"=", "%3D", SQL_formatted)
+    SQL_formatted = re.sub(r",", "%2C", SQL_formatted)
+    SQL_formatted = re.sub(r"'", "%27", SQL_formatted)
+    SQL_formatted = re.sub(r"\(", "%28", SQL_formatted)
+    SQL_formatted = re.sub(r"\)", "%29", SQL_formatted)
+    query = base_url + SQL_formatted + "%0D%0A%0D%0A&format={0}&TableName={1}".format(format, TableName)
+    os.system("wget -O {0}.{1} '".format(fname,format) + query + "'")
+    return query
+            </code></pre>
+            Using this code, the full URL for our SQL search above would thus become: <a href="https://skyserver.sdss.org/dr18/SkyServerWS/SearchTools/SqlSearch?cmd=SELECT+TOP+10%0D%0Ap.ra%2Cp.dec%0D%0AFROM+PhotoObj+AS+p%0D%0A+JOIN+SpecObj+AS+s+ON+s.bestobjid+%3D+p.objid%0D%0AWHERE%0D%0A+s.class+%3D+%27STAR%27%0D%0A%0D%0A&format=csv&TableName=">"https://skyserver.sdss.org/dr18/SkyServerWS/SearchTools/SqlSearch?cmd=SELECT+TOP+10%0D%0Ap.ra%2Cp.dec%0D%0AFROM+PhotoObj+AS+p%0D%0A+JOIN+SpecObj+AS+s+ON+s.bestobjid+%3D+p.objid%0D%0AWHERE%0D%0A+s.class+%3D+%27STAR%27%0D%0A%0D%0A&format=csv&TableName="</a>
+        </p>
+        <p>To accomplish the goals of this project we're going to need a lot more data than just the location of a few stars, however. In reality, we will need a lot of data on stars, galaxies, and quasars, and we will want to compare many parameters against each other. 
+            A good starting point for parameters would probably be to return the position (ra and dec), redshift (a measure of how far away an object is), the spectral flux in each band, the apparent brightness in each imaging band, the estimated on-sky size in each imaging band,
+            the time each observation was taken (to account for objects with multiple observations), as well as other identifying info we can use to query different APIs later. Thus, a full sample SQL command that is more useful would go something like:
+            <pre><code class="language-SQL">
+SELECT TOP 500000
+s.specObjID, s.class, s.z as redshift, s.zErr as redshiftError, s.spectroSynFluxIvar_u, s.spectroSynFluxIvar_g, s.spectroSynFluxIvar_r, s.spectroSynFluxIvar_z, s.spectroSynFluxIvar_i, s.spectroSynFlux_i, s.spectroSynFlux_z, s.spectroSynFlux_u, s.spectroSynFlux_g, s.plate, s.mjd, s.fiberid, s.run2d, p.objid, p.ra, p.dec, p.u, p.g, p.r, p.i, p.z, p.fieldID, p.err_u, p.err_g, p.err_r, p.err_i, p.err_z, p.petroRad_u, p.petroRad_g, p.petroRad_r, p.petroRad_i, p.petroRad_z, p.petroRadErr_u, p.petroRadErr_g, p.petroRadErr_r, p.petroRadErr_z, p.petroRadErr_i
+FROM PhotoObj AS p
+    JOIN SpecObj AS s ON s.bestobjid = p.objid
+WHERE 
+    (s.class = 'GALAXY') AND (zWarning = 0)
+            </code></pre>
+            Using <code class="language-python">getObjTable</code> on this SQL command would thus return 500,000 galaxies with the above parameters. We can then repeat this process for stars and quasars by changing the "s.class" parameter to "STAR" and "QSO" respectively. In this way we have obtained a good starting point in terms of observational data for the project &mdash; a combined sample of more than a million objects with spectra (more than 1/4 of all of what is available in SDSS).
+            In total these CSV files run about 200 MB each, so altogether this is a substantial amount of data. 
+        </p>
+        <h4>Visualizing SDSS data</h4>
+        <p>Of course, a natural question would be to ask &mdash; what do these objects actually look like? Astronomers are blessed to study beautiful things, and fortunately for us SDSS makes it easy to query their API for more detailed images and spectral data for any of the objects in their database.
+            SkyServer also hosts images for every object, which we can obtain from the <a href="http://skyserver.sdss.org/dr18/SkyServerWS/ImgCutout/getjpeg?">"http://skyserver.sdss.org/dr18/SkyServerWS/ImgCutout/getjpeg?"</a> endpoint by providing at least the ra and dec of the object as the "&ra=" and "&dec=" parameters.
+            We will accomplish this task again in Python with a custom function:
+            <pre><code class="language-python">
+def getImg(id,opt="GL",width=512,height=512,scale=0.4):
+"""Retrieve images of SDSS objects
+    params: id [dict] - dictionary of object identifiers, requires at least 'specObjID', 'ra', and 'dec'
+            opt [str] - options for image cutout, documentation: https://skyserver.sdss.org/dr14/en/help/docs/api.aspx#imgcutout; defaults to 'GL' (grid + label)
+            width [int] - width of image in pixels
+            height [int] - height of image in pixels
+            scale [float] - scale of image in arcsec/pixel
+
+    returns: url [str] - url of image cutout, downloaded with wget and saved as images/image_{specObjID}.jpeg 
+    """
+
+    url = "http://skyserver.sdss.org/dr18/SkyServerWS/ImgCutout/getjpeg?ra={0}&dec={1}&width={2}&height={3}&scale={4}&opt={5}".format(id['ra'],id['dec'],width,height,scale,opt)
+    os.system("wget -O images/image_{0}.jpeg '".format(str(int(id['specObjID']))) + url + "'")
+    return url
+            </code></pre>
+        To use this function we must also have a dictionary of object identifiers, which we can obtain from the CSV files we downloaded earlier. For example, to get the image of the first galaxy in the CSV file (assuming that earlier we saved it as "GAL_query.csv") we would do:
+        <pre><code class="language-python">
+def getID(row,fname):
+    row += 2 # skip table name + column names
+    with open(fname,"r") as f:
+        lines = f.readlines()
+        d = lines[row].split(",")
+        colNames = lines[1].split(",")
+    return dict(zip(colNames,d)) 
+
+    firstGalID = getID(0,"GAL_query.csv")
+        </code></pre>
+        </p>
+        
     </div>
 </body>
 

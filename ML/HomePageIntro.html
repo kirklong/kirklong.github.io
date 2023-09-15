@@ -6,8 +6,10 @@
 <head>
     <title>Machine Learning Project</title>
     <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link href="css/prism.css" rel="stylesheet" />
 </head>
 <body>
+    <script src="js/prism.js"></script>
     <div class="banner">
         <h1>Machine Learning Project</h1>
         <div class="tabs">
@@ -27,49 +29,56 @@
     <div class="content">
         <h2>Introduction</h2>
         <p>
-            In my machine learning class this fall, I'm going to be exploring how machine learning methodologies can be applied to my niche subfield of astrophysics: galaxies.
-            Astrophysics is a unique field in the sciences because it's very difficult to designed <em>controlled</em> experiments. Often the scales of objects in our univers &mdash; both temporally and spatially &mdash; are so large that we have no hope of testing our ideas in a traditional laboratory sense.
-            The universe is large, strange, and under no obligation to make sense to us, yet our ingenuity as a species has allowed us to learn some remarkable things through clever methods of observation and analysis. 
+            Astrophysics is a unique field in the sciences because it's very difficult to designed <em>controlled</em> experiments. Often the scales of objects in our universe &mdash; both temporally and spatially &mdash; are so large that we have no hope of testing our ideas in a traditional laboratory sense.
+            The universe is large, strange, and under no obligation to make sense to us, yet our ingenuity as a species has allowed us to learn some remarkable things through clever methods of observation and analysis. With advances in modern technology, 
+            astrophysics is becoming more and more a possibility for big data science, with an exciting frontier of problems for machine learning methods to tackle.
         </p>
         <p>
             One of the key building blocks of the universe as we know it are <em>galaxies</em>. Galaxies are collections of hundreds of billions (sometimes even trillions!) of stars, many with planetary systems just like ours, and we estimate that there are hundreds of millions of galaxies in our observable universe.
             Our own galactic environment in the Milky Way has likely played a role in allowing life on Earth to flourish, but despite the importance of galaxies to our universe many of their properties and behaviors remain poorly understood.
             For example, the evolution and formation of galaxies is still a very active area of research, with many unsolved mysteries. Understanding how galaxies form and evolve is critical to understanding our universe as a whole, as nearly all of the matter in the universe is contained within galaxies, and understanding these processes would allow us to more fully understand the our origin story.
-            NASA and other governmental agencies have invested large sums of money to support astrophysicists in unravelling these mysteries, most recently with the James Webb Space Telescope (JWST) launched in December 2021. JWST has opened a new window into the universe,
-            allowing us to peer back through cosmic time and see the earliest galaxies as they were forming, allowing us to better trace the evolutionary paths galaxies can take.
+            NASA and other governmental agencies have invested large sums of money to support astrophysicists in unravelling these mysteries.
         </p>
+        <div class="leftWrapFigure">
+            <p><img class=scaled src="img/smacs_jwst.jpg",alt="JWST image of SMACS galaxy cluster"></p>
+            <figcaption><p>JWST view of galaxy cluster SMACS 0723, showcasing a variety of "deep field" galaxies being gravitationally lensed by the foreground galaxy cluster. Stars have characteristic diffraction spikes (6 because of JWST's mirror geometry) but most other objects in the field are galaxies.</p>
+                <p><a href=https://www.nasa.gov/image-feature/goddard/2022/nasa-s-webb-delivers-deepest-infrared-image-of-universe-yet>Image credit</a>: NASA, ESA, CSA, and STScI</p>
+            </figcaption>
+        </div>
         <p>
-            As mentioned previously, part of the issue with understanding how galaxies work is that &mdash; on the scale of a human lifetime &mdash; our galaxy is not evolving <em>at all</em>. 
+            Part of the issue with understanding how galaxies work is that &mdash; on the scale of a human lifetime &mdash; our galaxy is not evolving <em>at all</em>. 
             It takes approximately 250 million years for our solar system to go around the center of the Milky Way, and its estimated that our galaxy itself started forming early on in the universe's history more than 13 billion years ago. 
-            This means we can't simply watch a single galaxy change over time, but instead have to get a little more creative. This is where JWST comes in. Fortunately for us, Maxwell and Einstein established that the universe has a fundamental speed limit 
+            This means we can't simply watch a single galaxy change over time, but instead have to get a little more creative. Fortunately for us, Maxwell and Einstein established that the universe has a fundamental speed limit 
             &mdash; the speed of light &mdash; and this means that when we look farther back into the universe we are also peering back in time. Telescopes are time machines! While the speed of light is essentially instantaneous to us here on Earth, the distances in space are so vast that it starts to add up &mdash; it takes light 8 minutes to travel from the surface of the Sun to us here on Earth, a few hours to reach planets in the outer solar system, years to reach other stars, and millions or even billions of years to traverse the distance between galaxies.
-            JWST is allowing us to look at objects farther away than ever before, which allows us to better fill-in the cosmic record of galaxies. If we assume that the laws of physics are universal, then we can examine populations of galaxies at different times to get a sense for how they evolve without having to wait around to watch a single galaxy change.
+            Large survey missions and flagship telescopes have allowed us to better fill-in the cosmic record of galaxies. If we assume that the laws of physics are universal, then we can examine populations of galaxies at different times to get a sense for how they evolve without having to wait around to watch a single galaxy change.
         </p>
         <p>
-            There are many different kinds of galaxies &mdash; our own Milky Way is a spiral galaxy actively forming stars, but there are also elliptical galaxies and irregular galaxies, with many subtypes. One of the more interesting subtypes from an evolutionary perspective are what are called
+            The universe is <em>teeming</em> with galaxies, and there are many different kinds. Our own Milky Way is a spiral galaxy actively forming stars, but there are also elliptical galaxies and irregular galaxies, with many subtypes therein. One of the more interesting subtypes from an evolutionary perspective are what are called
             <em>active galaxies</em>. These are rare, strange galaxies, that are violently releasing much larger amounts of energy than normal galaxies. We believe that the activity in these galaxies is powered by their supermassive black holes over-eating, producing collimated jets of plasma and radiation that extend for thousands of lightyears. 
             We believe that nearly all galaxies have supermassive black holes at their centers (including the Milky Way!) but most of these black holes are relatively quiet. Active galaxies have actively feeding black holes however, and it's not understood exactly why some galaxies are active and others aren't.
-            It's thought that this activity may be a phase all galaxies go through, and that this energy release and these jets may play a role in regulating the growth of galaxies, thus understanding them is critical in understanding the overall picture of galaxy evolution. My current research thus far in my Ph.D. has focused on modelling a hallmark observational signature of these kinds of galaxies, which we can use to weigh their central black holes.
+            It's thought that this activity may be a phase all galaxies go through, and that this energy release and these jets may play a role in regulating the growth of galaxies, thus understanding them is critical in understanding the overall picture of galaxy evolution. Modelling the hallmark observational signatures of these kinds of galaxies is an active and critical area of research, which we can use to weigh their central black holes.
             As nearly all galaxies have a central supermassive black hole, and these black holes can in turn influence the galactic environment, understanding how black holes at the centers of galaxies grow and evolve thus may yield critical information for understanding how their host galaxies behave, and to do this we have to accurately measure the masses of lots of black holes in lots of galaxies.
         </p>
-        <p> With these broad concepts in mind, I'd like to use machine learning methods to try to help answer these 10 specific questions:
+        <p> Machine learning methods provide great promise for helping us to sort out these problems. Thus some of the specific questions this project aims to answer with these methods are:
             <ol>
-                <li>Can we better tell faint stars apart from far away galaxies?</li>
-                <li>Can we obtain more accurate distance estimates for galaxies, distinguishing better from near vs. far?</li>
-                <li>Can we infer the properties of galaxies (gas content, star formation rate, etc.) without expensive modelling?</li>
-                <li>Can we distinguish between active and "normal" galaxies without spectra?</li>
-                <li>Can we simplify/speed up our model fits, by understanding if certain classes of parameters are correlated in unexpected ways?</li>
-                <li>Are there hints in the data that have previously gone unnoticed that can be used to distinguish between different physcial models?</li>
+                <li>Can we better tell faint stars apart from far away galaxies? Often in large surveys they can "spoof" each other, requiring detailed analysis to sort this out. Are there hidden trends ML methods can pick up on that humans have not?</li>
+                <li>Can we obtain more accurate distance estimates for galaxies, distinguishing better from near vs. far? Often we accomplish distance measurements by taking a spectrum of a source, but this is expensive and can be impractical, so again, are there subtle clues in imaging data ML methods can find that we have missed?</li>
+                <li>Can we infer the properties of galaxies (classification, gas content, star formation rate, etc.) without expensive modelling?</li>
+                <li>Can we distinguish between active and "normal" galaxies without spectra? What about between active galaxies and stars?</li>
+                <li>Can we simplify/speed up model fitting, by understanding if certain classes of parameters are correlated in unexpected ways? Specifically this project aims to better understand the relationship between model parameters in inferring the masses of supermassive black holes.</li>
+                <li>Are there systematic photometric differences between different kinds of galaxies, and can these properties be exploited to better infer their redshifts without taking spectra?</li>
                 <li>Can we improve our measurement uncertainties?</li>
-                <li>Can we correctly identify classes of galaxy populations, and/or find new ones?</li>
+                <li>Can we predict galaxy populations across cosmic time? As instruments advance (i.e. with the recent launch of JWST) now would be an excellent opportunity to test these kinds of predictions.</li>
+                <li>Can we correctly identify known classes of galaxy populations, and/or find new ones?</li>
                 <li>Can we obtain relationships between black hole mass and galaxy properties, and/or find new ones?</li>
-                <li>Are there ways we can analyze combined datasets from multiple instruments better with ML methods?</li>
+                <li>Are there ways we can "transfer" information from instrument to instrument with ML methods? For example, if we observe a certain kind of source through a blue and green filter, but the red filter has an error, can we accurately predict what the value should have been?</li>
+                <li>Are there long-scale time domain variations in quasars/active galaxies that models predict but have not yet been observed?</li>
             </ol>
         </p>
         <p>
-            In this project my goal is to thus to use machine learning methods to expand our knowledge in these areas, helping to better identify early galaxies using JWST data as well as to better measure and infer their properties, such as the mass of their central supermassive black holes. 
-            In doing so we will gain better demographics of galaxies at all times and of all types, enabling us to better put together the story of galaxy formation and evolution. At the precipice of all this knowledge in modern astronomy, it's crazy to look back and realize that just a hundred years allowing
-            we thought our entire universe was contained within the Milky Way, and that the Milky Way was the only galaxy in the universe. Each day the horizon of the universe expands, and so too does our knowledge of it, and I'm excited to apply these new and exciting methodologies to the treasure trove of data we have gathered on the universe's galaxies.
+            The goal of this project is thus to use machine learning methods to expand our knowledge in these areas, helping to better identify, classify, and understand galaxies and their evolution, as well as to better measure and infer their properties, most importantly the mass of their central supermassive black holes. 
+            In doing so we will gain better demographics of galaxies at all times and of all types, enabling us to better put together the story of galaxy formation and evolution. At the precipice of all this knowledge in modern astronomy, it is remarkable to look back and realize that just a hundred years ago
+            we thought our entire universe was contained within the Milky Way, and that the Milky Way was the only galaxy in the universe. Each day the horizon of the universe expands, and so too does our knowledge of it, with machine learning holding great promise as a new method in unraveling the treasure trove of data we have gathered on the universe.
         </p>
 
     </div>

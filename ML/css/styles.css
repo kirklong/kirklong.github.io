@@ -14,7 +14,16 @@
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
-    font-size: 17px;
+    font-size: 24px;
+    background-color: #65c9f7;
+}
+.tabs a:visited {
+    float: left;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 24px;
     background-color: #65c9f7;
 }
 
@@ -75,5 +84,38 @@ body {
     overflow: hidden;
     background-color: #333;
     font-family: Arial;
+    font-size: 18px;
     color: #f0e7e7;
+}
+
+/* image float for text wrapping */
+.leftWrapFigure {
+    float: left;
+    width: 30%;
+    margin: 0px 50px 20px 0px;
+    font-size: smaller;
+    font-style: italic;
+    text-align: left;
+}
+img.scaled {
+    width: 100%;
+    height: auto;
+}
+
+/* set list spacing */
+li:not(:last-child){
+    margin-bottom: 5px;
+}
+
+/* link options */
+.content a:link {
+    color: #74d3eb;
+    text-decoration: none;
+}
+.content a:visited{
+    color: #4a9196;
+    text-decoration: none;
+}
+.content a:hover {
+    text-decoration: underline;
 }
