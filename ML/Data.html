@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <!-- pretty table loading -->
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=yes" name="viewport">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+    crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+    <!-- end pretty table requirements -->
+
     <title>Machine Learning Project</title>
     <link rel="stylesheet" type="text/css" href="css/styles.css">
     <link href="css/prism.css" rel="stylesheet" />
@@ -92,13 +101,26 @@ WHERE
             Using <code class="language-python">getObjTable</code> on this SQL command would thus return 500,000 galaxies with the above parameters. We can then repeat this process for stars and quasars by changing the "s.class" parameter to "STAR" and "QSO" respectively. In this way we have obtained a good starting point in terms of observational data for the project &mdash; a combined sample of more than a million objects with spectra (more than 1/4 of all of what is available in SDSS).
             In total these CSV files run about 200 MB each, so altogether this is a substantial amount of data. 
         </p>
+        <p>Let's look at a sample of what some of this returned data looks like. Opening the CSV with all of the quasar data, the first few rows of (uncleaned) data look something like this:</p>
+
+        <div class="container-fluid">
+            <main class="row">
+                <div class="col">
+                    <div id="sampleQueryData"></div>
+                </div>
+            </main>
+        </div>
+
+        <p>When cleaning this data...LEFT OFF HERE</p>
+
         <h4>Visualizing SDSS data</h4>
-        <p>Of course, a natural question would be to ask &mdash; what do these objects actually look like? Astronomers are blessed to study beautiful things, and fortunately for us SDSS makes it easy to query their API for more detailed images and spectral data for any of the objects in their database.
-            SkyServer also hosts images for every object, which we can obtain from the <a href="http://skyserver.sdss.org/dr18/SkyServerWS/ImgCutout/getjpeg?">"http://skyserver.sdss.org/dr18/SkyServerWS/ImgCutout/getjpeg?"</a> endpoint by providing at least the ra and dec of the object as the "&ra=" and "&dec=" parameters.
-            We will accomplish this task again in Python with a custom function:
-            <pre><code class="language-python">
+        <p>Of course, a natural question would be to ask &mdash; what do these objects actually look like? Astronomers are blessed to study beautiful things, and fortunately SDSS makes it easy to query their API for more detailed images and spectral data for any of the objects in their database.
+            SkyServer also hosts images for every object, which we can obtain from the <a href="http://skyserver.sdss.org/dr18/SkyServerWS/ImgCutout/getjpeg?">"http://skyserver.sdss.org/dr18/SkyServerWS/ImgCutout/getjpeg?"</a> endpoint by providing at least the ra and dec of the object as the "ra" and "dec" parameters.
+            We will accomplish this task again in Python with a custom function that formats the url appropriately and sends a GET request via the system's wget:
+        </p>
+        <pre><code class="language-python">
 def getImg(id,opt="GL",width=512,height=512,scale=0.4):
-"""Retrieve images of SDSS objects
+    """Retrieve images of SDSS objects
     params: id [dict] - dictionary of object identifiers, requires at least 'specObjID', 'ra', and 'dec'
             opt [str] - options for image cutout, documentation: https://skyserver.sdss.org/dr14/en/help/docs/api.aspx#imgcutout; defaults to 'GL' (grid + label)
             width [int] - width of image in pixels
@@ -111,9 +133,15 @@ def getImg(id,opt="GL",width=512,height=512,scale=0.4):
     url = "http://skyserver.sdss.org/dr18/SkyServerWS/ImgCutout/getjpeg?ra={0}&dec={1}&width={2}&height={3}&scale={4}&opt={5}".format(id['ra'],id['dec'],width,height,scale,opt)
     os.system("wget -O images/image_{0}.jpeg '".format(str(int(id['specObjID']))) + url + "'")
     return url
-            </code></pre>
-        To use this function we must also have a dictionary of object identifiers, which we can obtain from the CSV files we downloaded earlier. For example, to get the image of the first galaxy in the CSV file (assuming that earlier we saved it as "GAL_query.csv") we would do:
-        <pre><code class="language-python">
+        </code></pre>
+        <div class="leftWrapFigure">
+            <p><img src="img/image_299489677444933632.jpeg" alt="SDSS galaxy image" width="512" height="512">
+                <figcaption>Sample SDSS galaxy image downloaded with <code class="language-python">getImg</code> and passing the options "GL" to obtain the grid and label.</figcaption>
+            </p>
+        </div>
+        <p>
+            To use this function we must also have a dictionary of object identifiers, which we can obtain from the CSV files we downloaded earlier. For example, to get the image of the first galaxy in the CSV file (assuming that earlier we saved it as "GAL_query.csv") we would do:
+            <pre><code class="language-python">
 def getID(row,fname):
     row += 2 # skip table name + column names
     with open(fname,"r") as f:
@@ -122,11 +150,127 @@ def getID(row,fname):
         colNames = lines[1].split(",")
     return dict(zip(colNames,d)) 
 
-    firstGalID = getID(0,"GAL_query.csv")
+firstGalID = getID(0,"GAL_query.csv")
+getImg(firstGalID) # returns url of image, downloads image to images/image_{specObjID}.jpeg
         </code></pre>
         </p>
-        
-    </div>
+        <p>
+            We can see that it works, and obtains a nice image of a galaxy. All of the useful parameters we get from a visual image have already been downloaded from the database (i.e. the brightness and object size in different bands), but it's still fun to look at! But what about the spectra? SkyServer also hosts pre-reduced spectra for each object, which we can download from the <a href="https://skyserver.sdss.org/dr18/en/get/specById.ashx?">https://skyserver.sdss.org/dr18/en/get/specById.ashx?</a> endpoint by passing the object's specObjID as the "ID" parameter. 
+            However, SkyServer only produces "quick-looks" of the spectra, which are useful for visual diagnostics but unfortunately does not contain the actual spectral data. 
+            To obtain the actual data in a machine readable format we must query the Science Archive Server (SAS) endpoint at <a href="http://dr18.sdss.org/optical/spectrum/view/data/format={format}">http://dr18.sdss.org/optical/spectrum/view/data/format={format}</a>, where the format can be "csv" or "fits". "Fits" (short for flexible image transport system) are a common binary format for astronomical data, but they can be a little harder to work with than just a standard CSV file.
+            We must also append the spectral identifiers to the url via the "spec", "plateid", "mjd", "fiberid", and "run2d" parameters. We'll again accomplish all of this via a custom Python function that will return the spectrum in the format we want based on an "id" dictionary (like we created above):
+        </p>
+        <div class="leftWrapFigure">
+            <p><img src="img/spectrum_299489677444933632.png" alt="SDSS galaxy spectrum" width="512" height=auto>
+                <figcaption>Sample SDSS galaxy spectrum quick-look downloaded with <code class="language-python">getSpectrum</code>.</figcaption>
+            </p>
+        </div>
+        <pre><code class="language-python">
+def getSpectrum(id,format='png',spec='lite'):
+    """Retrieve spectra of SDSS objects
+    params: id [dict] - dictionary of object identifiers, requires at least 'specObjID'
+            format [str] - format of spectrum, options are 'png', 'fits', 'csv'
+            spec [str] - either 'lite' (default) or 'full'
+    returns: url [str] - url of spectrum, downloaded with wget and saved as spectra/spectrum_{specObjID}.{format}
+    """
+
+    if format == 'png':
+        base_url = "https://skyserver.sdss.org/dr18/en/get/specById.ashx?ID="
+        url = base_url + str(int(id['specObjID']))
+    elif format == 'fits' or format == 'csv':
+        url = "http://dr18.sdss.org/optical/spectrum/view/data/format={4}/spec={5}?plateid={0}&mjd={1}&fiberid={2}&reduction2d={3}".format(str(int(id['plate'])), str(int(id['mjd'])), str(int(id['fiberid'])), str(int(id['run2d'])),format,spec)
+    os.system("wget -O spectra/spectrum_{0}.{1} '".format(str(int(id['specObjID'])),format) + url + "'")
+    return url
+
+getSpectrum(firstGalID) # returns url of spectrum, downloads spectrum to spectra/spectrum_{specObjID}.{format}, in this case downloading the quick-look png by default.
+        </code></pre>
+
+        <p>
+            This is a great default visualization, but here there is data we will want to access that is not included in the data-base parameter download from earlier. 
+            If we opt to download the spectrum as a CSV or FITS file we can access the individual flux values obtained by the instrument at every wavelength, which is useful because we may want to compare just portions of the spectra (i.e. where a strong common spectral line exists) from one object to another.
+        </p>
+        <div class="leftWrapFigure">
+            <p><img src="img/sampleSpectrumData.png" alt="SDSS galaxy spectrum" width="512" height=auto>
+                <figcaption>The same galaxy spectrum from before, this time visualized as a few of the actual data rows (in total there are 3818 rows of data) obtained with<code class="language-python">getSpectrum(firstGalID,format='csv')</code>.</figcaption>
+            </p>
+        </div>
+        <p>Here we see the actual spectral data contains four columns: Wavelength, Flux, BestFit, and SkyFlux. Wavelength is the x-axis quantity of the plot shown above (in units of Angstroms), while the other three columns tell us how much light was seen at that wavelength with a few different classifications. 
+            The "Flux" column contains simply the raw "flux" from the detector while the "BestFit" column contains the value from a best fit model to the entire spectrum. 
+            The "SkyFlux" column contains how much light at that wavelength was detected from the background sky, not the actual object itself. All three of these columns have units of flux as shown on the y-axis of the spectrum plot. What goes into the model "BestFit" category is very complicated, and the culmination of several decades of instrumentation and astrophysical modelling, and for the rest of the project we will use this column whenever using spectral data, although we will compare and check how this choice may influence results by using the standard "Flux" column.
+        </p>
+        <h3>Distinguishing between stars, galaxies, and quasars with spectra</h3>
+        <p>
+            When first obtaining our data, we had to use the "class" identifier from the SpecObj table to distinguish between stars, galaxies, and quasars. But how does SDSS actually determine this? The answer is through spectra.
+            While in our first example it was pretty clear from the photograph that the object in question was a galaxy, oftentimes galaxies are so far away that they appear as faint smudges of light on the sky, and they can be hard to tell apart from stars.
+            Take the following three images, for example:
+        </p>
+        <div class="centerFigure3">
+            <img src="img/STAR_dot.jpeg">
+            <img src="img/GAL_dot.jpeg">
+            <img src="img/QSO_dot.jpeg">
+        </div>        
+        <p>One is a galaxy, one is a star, and one is a quasar. But which is which? Looking at each object's spectra yields the clues we need to determine this:</p>
+        <div class="centerFigure3">
+            <img src="img/STAR_spectrumSample.png">
+            <img src="img/GAL_spectrumSample.png">
+            <img src="img/QSO_spectrumSample.png">
+        </div>
+        <p>The star is leftmost, the galaxy in the middle, and the quasar on the right. While they might be harder to identify with the images alone, the spectra look markedly different for each class of object. 
+        The star has the characteristic signature of an object radiating at least somewhat like a blackbody (an object whose temperature determines its spectrum &mdash; we can measure the temperature by measuring where the spectrum peaks). The galaxy and the quasar, however, do not show this kind of emission.
+        This indicates that the galaxy and quasar have other radiative processes at work. If we look at the y-axis scale of each spectrum we see that the star has a much larger range than either the quasar or galaxy &mdash; comparatively speaking their spectra are relatively flat, with large spikes around prominent emission lines only.
+        How then do we determine the difference between the galaxy and the quasar? One way to distinguish the two is to compare their emission lines. When looking at the galaxy spectrum we see that the emission lines are narrow spikes above the continuum, but in the quasar spectrum these are much broader features.
+        These broader features are called "broad emission lines" and are a hallmark of quasars. The broadening of these emission lines is a marker that the gas that produced this emission was moving at high speeds, and we believe that these high speeds are caused by the emitting gas orbiting around a supermassive black hole.
+        Normal galaxies also have supermassive black holes, but we believe they aren't actively eating, and thus they have no hot emitting gas close enough to their black holes to show this characteristic broadening that is associated with quasars. Another distinguishing factor is in the redshift &mdash; quasars usually have much higher 
+        redshifts than typical galaxies, indicating they are much farther away, which means that if they appear roughly as bright as a galaxy much closer to us they must be intrinsically <em>much</em> more luminous than the galaxy. This is another predicted feature 
+        of accretion onto a supermassive black hole, and is one of the many reasons why quasars are so interesting to study, and so important to identify in our surveys.
+        </p>
+
+
+
+    <!-- PRETTY TABLE JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.2.1/js/bootstrap.bundle.min.js"></script>
+    <script src="js/jquery.csv.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+    <script src="js/csv_to_html_table.js"></script>
+
+    <script>
+        var CSVList = ['data/QSO_querySample.csv'];
+        var idList = ['sampleQueryData'];
+        // function format_link(link) {
+        //     if (link)
+        //         return "<a href='" + link + "' target='_blank'>" + link + "</a>";
+        //     else return "";
+        // }
+        for (var i = CSVList.length - 1; i >= 0; i--){
+            CSVList[i];
+            idList[i];
+            CsvToHtmlTable.init({
+                csv_path: CSVList[i],
+                element: idList[i],
+                allow_download: true,
+                csv_options: {
+                    separator: ",",
+                    delimiter: '"'
+                },
+                datatables_options: {
+                    paging: false,
+                    responsive: true,
+                    scrollCollapse: true,
+                    autowidth: true,
+                    info: true,
+                    scrollX: true,
+                    scrollY: true,
+                    searching: true
+                },
+                // custom_formatting: [
+                //     [4, format_link]
+                // ]
+            });
+        }
+    </script>
+    <!-- END PRETTY TABLE JS -->
 </body>
 
 </html>

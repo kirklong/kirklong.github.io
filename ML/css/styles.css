@@ -78,6 +78,7 @@ body {
 
 /* create content class, aligned to tabs and banner (should span the same amount of page) */
 .content {
+    display: inline-block;
     width: 92.5%;
     margin-left: 2.5%;
     padding: 16px;
@@ -87,7 +88,32 @@ body {
     font-size: 18px;
     color: #f0e7e7;
 }
-
+/* format tables */
+table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    table-layout:fixed;
+    border-collapse: collapse;
+    width: 100%;
+}
+tr:nth-child(even){
+    background-color: #333 !important;
+}
+tr:nth-child(odd){
+    background-color: #727171 !important;
+}
+tr:first-child{
+    background-color: #0e0d0d !important;
+}
+th {
+    background-color: #333;
+    color: #f0e7e7;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: left;
+    padding: 8px;
+}
 /* image float for text wrapping */
 .leftWrapFigure {
     float: left;
@@ -100,6 +126,34 @@ body {
 img.scaled {
     width: 100%;
     height: auto;
+}
+/* center image panel */
+.centerFigure3 {
+    display: flex;
+    justify-content: center;
+}
+.centerFigure3 img{
+    width: 30%;
+    height: auto;
+    margin: 0 10px
+}
+.centerFigure2 {
+    display: flex;
+    justify-content: center;
+}
+.centerFigure2 img{
+    width: 45%;
+    height: auto;
+    margin: 0 10px
+}
+.centerFigure1{
+    display: flex;
+    justify-content: center;
+}
+.centerFigure1 img{
+    width: 90%;
+    height: auto;
+    margin: 0 10px
 }
 
 /* set list spacing */
@@ -118,4 +172,42 @@ li:not(:last-child){
 }
 .content a:hover {
     text-decoration: underline;
+}
+
+/* header styling */
+h1 {
+    font-size: 48px;
+    font-weight: bold;
+    color: #f0e7e7;
+    text-align: left;
+}
+h2 {
+    font-size: 42px;
+    font-weight: bold;
+    color: #f0e7e7;
+    text-align: left;
+}
+h3 {
+    font-size: 36px;
+    font-weight: bold;
+    color: #f0e7e7;
+    text-align: left;
+}
+h4 {
+    font-size: 30px;
+    font-weight: bold;
+    color: #f0e7e7;
+    text-align: left;
+}
+h5 {
+    font-size: 26px;
+    font-weight: bold;
+    color: #f0e7e7;
+    text-align: left;
+}
+h6 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #f0e7e7;
+    text-align: left;
 }
