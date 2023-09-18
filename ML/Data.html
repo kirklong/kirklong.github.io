@@ -111,8 +111,155 @@ WHERE
             </main>
         </div>
 
-        <p>When cleaning this data...LEFT OFF HERE</p>
+        <p>Fortunately for us a lot of the cleaning steps have already been taken care of by the SDSS data reduction pipeline, and in addition we've added an additional parameter to our SQL query command to only return information on objects with an identified redshift (that's what the "zWarning" parameter does in the SQL query above).
+            But even with these great steps the data is still not perfect &mdash; for example in a few of the rows displayed here there are suspicious "-1000" values for some of the radius calculation errors, which is obviously incorrect and is in fact a flag added by the pipeline indicating that the radius value in that band should note be trusted.
+            We can check these things and clean the data in Python by reading our CSV files into a pandas DataFrame:
+            <pre><code class="language-python">
+import pandas as pd
+df_QSO = pd.read_csv("QSO_querySample.csv",header=1) #column names are at index 1 since row 0 is the table name
+df_STAR = pd.read_csv("STAR_querySample.csv",header=1)
+df_GAL = pd.read_csv("GAL_querySample.csv",header=1)
+combined_df = pd.concat([df_QSO,df_STAR,df_GAL]) #combine all three dataframes into one as they share the same columns
+            </code></pre>
+            As a first step we can check for missing and duplicated values in the dataset:
+            <pre><code class="language-python">
+total_missing = sum(combined_df.isnull().sum()) #df.isnull().sum() returns the number of missing values in each column, sum() sums over all columns
+duplicated = combined_df.duplicated().sum()
+print("Missing values: {0}\nDuplicated values: {1}".format(missing,duplicated))
+            </code></pre>
+            which returns:
+            <pre><code class="language-bash">
+Missing values: 0
+Duplicated values: 0
+            </code></code></pre>
+            indicating that there are no missing or duplicated values in our combined SDSS dataset. This is great news, but we still have to deal with the "-1000" values we saw earlier. In fact, astrophysically speaking the only 
+            columns in our data that should be allowed to have a negative number are the "dec" (declination of the object on they sky), redshift (how fast the object is moving towards/away from us), and potentially any of the "spectroSynFlux" (how much flux is in a given band relative to the continuum) columns. 
+            Errors in particular should never be negative, so let's just count up in total how many rows have negative values in the other numerical data columns:
+            <pre><code class="language-python">
+exclude = ["specObjID","class","run2d","objid","fieldID","plate","mjd","fiberid","ra","dec","redshift","sepctrSynFlux_i","spectroSynFlux_z","spectroSynFlux_u","spectroSynFlux_g"] #exclude these columns as they are identifers or allowed to be negative
+for col in combined_df.columns:
+    if col not in exclude: #skip excluded columns
+        negMask = combined_df[col] < 0
+        numNeg = negMask
+        if numNeg > 0:
+            print("{0} has {1} negative values with mean {2} (negative values only)".format(col,numNeg,combined_df[col][negMask].mean()))
+            </code></pre>
+            which returns:
+            <pre><code class="language-bash">
+redshiftError has 2489 negative values with mean -1.5484130172760144 (negative values only)
+u has 95 negative values with mean -9999.0 (negative values only)
+g has 92 negative values with mean -9999.0 (negative values only)
+r has 71 negative values with mean -9999.0 (negative values only)
+i has 82 negative values with mean -9999.0 (negative values only)
+z has 89 negative values with mean -9999.0 (negative values only)
+err_u has 95 negative values with mean -9999.0 (negative values only)
+err_g has 92 negative values with mean -9999.0 (negative values only)
+err_r has 71 negative values with mean -9999.0 (negative values only)
+err_i has 82 negative values with mean -9999.0 (negative values only)
+err_z has 89 negative values with mean -9999.0 (negative values only)
+petroRadErr_u has 404331 negative values with mean -1002.1143691678352 (negative values only)
+petroRadErr_g has 236429 negative values with mean -1003.4636571655761 (negative values only)
+petroRadErr_r has 72823 negative values with mean -1008.7737253340291 (negative values only)
+petroRadErr_z has 61760 negative values with mean -1012.6767001295336 (negative values only)
+petroRadErr_i has 22191 negative values with mean -1033.2530305078635 (negative values only)
+                </code></pre>
+                Most of these are pretty small, but a few are quite large, with the largest being the "petroRadErr_u" column with more than 400,000 non-physical values. SDSS tags most of the bad measurements with either "-1000" or "-9999" (this is why the mean for the "petroRadErr" are not exactly -1000, as some were assigned -9999).
+                For the purposes of cleaning, we'll drop all of the rows with negative values in the different imaging bands/errors ("u", "g", "r", "i", and "z") as doing so will only remove at most a few hundred rows from our 1.5 million row dataset.
+                We'll also drop any rows with a negative redshift error, as redshift will be a crucial parameter for our analysis and we don't want to include any objects with bad redshift measurements (something we already tried to avoid initially with our SQL command!).
+                With the radius columns the solution is not as clear, as removing all of these rows could potentially remove a significant porition (roughly a third) of our dataset. 
+                In doing further analysis, it seems that the majority of these size errors are associated with galaxies (60%), with stars accounting for (25%) and quasars (15%) of the radii errors. 
+                In doing most of the analysis we will not need the sizes of the objects (redshifts, classification, and color magnitudes will be most important) thus we can just drop these columns entirely for most of the project, but occasionally we will want to compare sizes and in this case we will apply the following procedure:
+                <ol>
+                    <li>For each object we will check if the size error is contained to less than two bands (i.e. an error only in the u and g bands but not in the g, r, z, or i bands). 
+                        This can happen because different types of objects emit in different colors, so an object may have no "size" at one color but still a distinct size at another.</li>
+                    <li>If the error is in less than two of the imaging bands, we will compare the magnitude of the object in the different imaging bands.</li>
+                    <li>If the magnitude in the corresponding bands is much smaller than the magnitude in the other bands, this likely means the object just doesn't emit enough light in those bands to have a quantifiable size, and thus we will replace the bad value with 0.</li>
+                    <li>If conversely the errors extend to more than two bands, or the object is plenty bright in the bands with the size errors, we will then drop it from the dataset.</li>
+                </ol>
+                This procedure will effectively create two datasets out of our initial one &mdash; one with the size columns dropped entirely (for most of our analysis), and one with the size columns cleaned as described above. We can accomplish this again using pandas:
+                <pre><code class="language-python">
+#drop rows with negative values in imaging bands/errors and errors in redshifts
+mask = (combined_df["u"] > 0) & (combined_df["g"] > 0) & (combined_df["r"] > 0) & (combined_df["i"] > 0) & (combined_df["z"] > 0) & (combined_df["err_u"] > 0) & (combined_df["err_g"] > 0) & (combined_df["err_r"] > 0) & (combined_df["err_i"] > 0) & (combined_df["err_z"] > 0) & (combined_df["redshiftError"] > 0)
+combined_df = combined_df[mask]
+df_noSize = combined_df.drop(columns=["petroRad_u","petroRad_g","petroRad_r","petroRad_i","petroRad_z","petroRadErr_u","petroRadErr_g","petroRadErr_r","petroRadErr_i","petroRadErr_z"]) #create a new dataframe without size information
+df_noSize.to_csv("combined_noSize.csv",index=False) #save the resulting dataframe to a new CSV file
 
+#clean size columns
+df_wSize = combined_df.copy() #create a copy of the dataframe to clean the size columns
+cols2Check = ["petroRadErr_u","petroRadErr_g","petroRadErr_r","petroRadErr_i","petroRadErr_z"] #need at least one to have an error
+mask = df_wSize[cols2Check] < 0
+errCounts = np.sum(mask,axis=1)
+inds2Check = np.where((errCounts <= 2) & (errCounts > 0))[0] #get the indices of the rows with size errors in less than 2 bands
+discard = np.where(errCounts > 2)[0] #throw away rows with errors in more than 2 bands
+for i in inds2Check: #note that this takes a few minutes to run...probably a more efficient way but only needs to be done once!
+    mags = df_wSize.iloc[i][["u","g","r","i","z"]] #magnitudes in each band
+    total = sum(mags)
+    badBands = [j for j in range(len(cols2Check)) if mask.iloc[i][j]]
+    badMags = [mags[j] for j in badBands]
+    badTotal = sum(badMags)
+    if badTotal/total < 0.1: #if the object is not bright in the bands with the size errors, replace the size errors with 0
+        colNames = ["petroRad_u","petroRad_g","petroRad_r","petroRad_i","petroRad_z"]
+        toReplace = [colNames[j] for j in badBands]
+        df_wSize.iloc[i][[toReplace]] = 0.0
+        toReplace = [cols2Check[j] for j in badBands]
+        df_wSize.iloc[i][[toReplace]] = 0.0 #set the error also to "zero" to indicate that we replaced this size
+    else: #otherwise throw out the row
+        np.append(discard,i)
+df_wSize.drop(index=discard,inplace=True)
+
+df_wSize.to_csv("combined_wSize.csv",index=False) #save the resulting dataframe to a new CSV file
+                </code></pre>
+                With the drops the resulting datasets are now 1,497,405 and 1,319,014 rows (for the noSize and wSize datasets respectively). Applying this criteria allowed us to drop half as many rows from the size dataset as we would have if we just blanket dropped everything with an error.
+                The resulting datasets are thus still quite large and suitable for machine learning methods &mdash; here we show a sample of the cleaned (with sizes) data:
+        </p>
+
+        <div class="container-fluid">
+            <main class="row">
+                <div class="col">
+                    <div id="sampleQueryDataClean"></div>
+                </div>
+            </main>
+        </div>
+        <p>
+            We can get a quick-look at all this data by generating a simple boxplot of the different parameters by object type. We can do this in python with the help of the matplotlib and seaborn packages:
+            <pre><code class="language-python">
+def visualizeDF(df,cols2Plot,x,nc=3):
+    """Visualize dataframe as boxplot
+    params: df [pandas dataframe] - dataframe to visualize
+            cols2Plot [list] - list of columns to plot
+            x - x variable for box plot
+            nc [int] - number of columns to plot per row
+    returns: fig,ax [matplotlib figure, axis] - figure and axis of plot
+    """
+    Nc = len(cols2Plot)
+    nr = int(np.ceil(Nc/nc)) #number of rows needed to plot all data columns with nc columns per row
+
+    fig, axs = plt.subplots(nr, nc, figsize=(16*(nc/nr),12*(nr/nc)),constrained_layout=True)
+
+    for i, column in enumerate(cols2Plot):
+        ax = axs.flatten()[i]
+        try:
+            sns.boxplot(x=x, y=df[column], ax=ax)
+            ax.set_title(column)
+            ax.set_ylabel(column)
+            ax.set_xlabel('') 
+        except:
+            "error at column {0}".format(column)
+    for i in range(nr*nc-Nc):
+        fig.delaxes(axs.flatten()[-(1+i)]) #delete extra axes
+    return fig,axs
+            </code></pre>
+            Calling this function on our cleaned data (with sizes) generates the plot at left.
+            <div class="leftWrapFigure">
+                <p><img src="img/query_boxPlot.jpg" alt="Boxplot of SDSS data" width=100% height=auto>
+                    <figcaption>Boxplot of SDSS data with sizes included.</figcaption>
+                </p>
+            </div>
+            We can see that the redshifts are clearly different depending on the type of object, with stars having roughly 0 redshift (they are all nearby in our own galaxy) while other galaxies have intermediate redshifts (averaging around 1) while quasars have redshifts that more than double that of standard galaxies.
+            There are also some interesting trends in the flux bands (u, g, r, i, and z) where quasars appear to be distinct from the other classes of objects. While it may appear that there are significant outliers in the flux and radius plots, this is in reality probably due to the fact 
+            that some objects are very close while others are very far, creating a huge spread. Most objects are far away from us, but those close to us will appear as outliers as they will appear much brighter, and thus also have a larger on-sky size. Thus we will leave these outliers intact for now but be mindful of them going forward.
+        </p>
+        <br><br>
         <h4>Visualizing SDSS data</h4>
         <p>Of course, a natural question would be to ask &mdash; what do these objects actually look like? Astronomers are blessed to study beautiful things, and fortunately SDSS makes it easy to query their API for more detailed images and spectral data for any of the objects in their database.
             SkyServer also hosts images for every object, which we can obtain from the <a href="http://skyserver.sdss.org/dr18/SkyServerWS/ImgCutout/getjpeg?">"http://skyserver.sdss.org/dr18/SkyServerWS/ImgCutout/getjpeg?"</a> endpoint by providing at least the ra and dec of the object as the "ra" and "dec" parameters.
@@ -198,7 +345,8 @@ getSpectrum(firstGalID) # returns url of spectrum, downloads spectrum to spectra
             The "Flux" column contains simply the raw "flux" from the detector while the "BestFit" column contains the value from a best fit model to the entire spectrum. 
             The "SkyFlux" column contains how much light at that wavelength was detected from the background sky, not the actual object itself. All three of these columns have units of flux as shown on the y-axis of the spectrum plot. What goes into the model "BestFit" category is very complicated, and the culmination of several decades of instrumentation and astrophysical modelling, and for the rest of the project we will use this column whenever using spectral data, although we will compare and check how this choice may influence results by using the standard "Flux" column.
         </p>
-        <h3>Distinguishing between stars, galaxies, and quasars with spectra</h3>
+        <br><br>
+        <h4>Distinguishing between stars, galaxies, and quasars with spectra</h3>
         <p>
             When first obtaining our data, we had to use the "class" identifier from the SpecObj table to distinguish between stars, galaxies, and quasars. But how does SDSS actually determine this? The answer is through spectra.
             While in our first example it was pretty clear from the photograph that the object in question was a galaxy, oftentimes galaxies are so far away that they appear as faint smudges of light on the sky, and they can be hard to tell apart from stars.
@@ -224,6 +372,282 @@ getSpectrum(firstGalID) # returns url of spectrum, downloads spectrum to spectra
         redshifts than typical galaxies, indicating they are much farther away, which means that if they appear roughly as bright as a galaxy much closer to us they must be intrinsically <em>much</em> more luminous than the galaxy. This is another predicted feature 
         of accretion onto a supermassive black hole, and is one of the many reasons why quasars are so interesting to study, and so important to identify in our surveys.
         </p>
+        <br><br>
+        <h3>Model data</h3>
+        <p>
+        While there are many opportunities to help answer the questions posed in the <a href="HomePageIntro.html">introduction</a> with the observational dataset we have obtained from SDSS above, some of the modelling questions cannot be answered by observational data alone. 
+        In general, the way we measure supermassive black hole masses for many quasars is to model the broad emission lines in their spectra, and as shown in <a href="https://iopscience.iop.org/article/10.3847/1538-4357/ace4bb">Long+ (2023)</a> the choice of model used can introduce systematic uncertainties in the black hole mass measurement.
+        Fitting these models to the data is also computationally expensive, as they usually have at least 10 free parameters, thus we are interested in how we can use machine learning to speed up this process, by discovering if there are unkown correlations in our parameter space and if there are easier ways to discriminate between different models we haven't noticed yet.
+        To do this, we will use the model prescription presented in <a href="https://iopscience.iop.org/article/10.3847/1538-4357/ace4bb">Long+ (2023)</a> to generate a large sample of tagged model spectra, which we can then analyze with machine learning methods.
+        </p>
+
+        <p>
+            The modelling code provided by <a href="https://iopscience.iop.org/article/10.3847/1538-4357/ace4bb">Long+ (2023)</a> is written in Julia, so we will also use Julia to generate the synthetic data with the following code:
+            <pre><code class="language-julia">
+#!/usr/bin/env julia
+using Pkg
+Pkg.activate("DiskWind") #use the modelling code of Long+ (2023), have to download first
+using DiskWind, Distributions
+
+function getModelProducts(θ,bins::Int=200,nr::Int=1024,nϕ::Int=2048)
+    """Obtain model line profiles, phase curves, and time delays for a given set of model parameters
+    params: θ [array] - array of model parameters, see DiskWind.jl for details
+            bins [int] - number of bins to use for histogramming
+            nr [int] - number of radial bins to use for model
+            nϕ [int] - number of angular bins to use for model
+    returns: νCenters [array] - array of center frequencies for line profile, in units of km/s
+             LP [array] - array of line profile values, normalized to maximum intensity
+             meanPhase [array] - array of mean phase values, arbitrary units
+             delays [array] - array of time delays in units of days
+             t_char [float] - characteristic model size in days
+             rBLR [float] - characteristic model size in μas
+    """
+
+    coordsType = :polar; scale_type = :log; νMin = 0.95; νMax = 1.05; τ = 10.
+    i,r̄,Mfac,rFac,f1,f2,f3,f4,pa,Sα = θ
+    s = f1 + f2 + f3 + f4
+    f1,f2,f3,f4 = f1/s,f2/s,f3/s,f4/s
+
+    α,β,r,ν,ϕ,sini,cosi,dA,rMin,rMax = DiskWind.setup(i,nr,nϕ,r̄,rFac,Sα,coordsType,scale_type)
+    
+    rs = 2*Mfac*3e8*2e30*6.67e-11/9e16
+    days = 24*3600.
+    t = r.*(rs/3e8/days) .* (1 .+ sin.(ϕ).*sini)
+    ang = rs/(100e6*3.26*3e8*365*days)/4.848e-12 #μas size at fixed distance of 100 Mpc
+    X = α.*ang; Y = β.*ang 
+
+    I = DiskWind.getIntensity(r,ϕ,sini,cosi,rMin,rMax,Sα,τ,f1=f1,f2=f2,f3=f3,f4=f4)
+    rBLR = sum(r.*I.*dA)/sum(I.*dA)*ang #rBLR in μas
+
+    νEdges,νCenters,flux = DiskWind.histSum(ν,I.*dA,νMin=νMin,νMax=νMax,centered=true,bins=bins)
+    νCenters = (νCenters.-1).*3e5 # convert to km/s
+    LP = flux./maximum(flux) 
+
+    t_char = sum(t.*I.*dA)/sum(I.*dA) # characteristic model size in days
+    delays = zeros(length(νCenters))
+    for i=1:length(νEdges)-1
+        ν1,ν2 = νEdges[i],νEdges[i+1]
+        mask = (ν.>ν1) .& (ν.<=ν2)
+        delays[i] = sum(t[mask].*I[mask].*dA[mask])/sum(I[mask].*dA[mask])
+    end
+
+    Urange = range(-60,stop=0,length=10); Vrange = range(-60,stop=0,length=10) #Mλ, sparse coverage, only do "half" the box because symmetry about axis
+    #initialize empty matrix where each entry is an array with length that matches νCenters
+    phaseList = zeros(length(Urange),length(Vrange),length(νCenters))
+    for i=1:length(Urange)
+        for j=1:length(Vrange)
+            dϕAvg = DiskWind.phase(ν,I,dA,α,β,r,Urange[i],Vrange[j],pa,νMin,νMax,bins)
+            phaseList[i,j,:] .= dϕAvg .* LP ./ (1 .+ LP)
+        end
+    end
+    meanPhase = [sum(phaseList[:,:,i]) for i=1:length(νCenters)]
+    
+    return νCenters,LP,meanPhase,delays,t_char,rBLR
+end
+
+function tagModelProducts(θ,bins::Int=200,nr::Int=1024,nϕ::Int=2048)
+    """tag model products based on qualitative features
+    params: θ [array] - array of model parameters, see DiskWind.jl for details
+            bins [int] - number of bins to use for histogramming
+            nr [int] - number of radial bins to use for model
+            nϕ [int] - number of angular bins to use for model
+    returns: singlePeak [bool] - true if line profile has single peak, false otherwise
+             doublePeak [bool] - true if line profile has double peak, false otherwise
+             rotation [str] - "cw" if phase curve shows clockwise rotation, "ccw" if phase curve shows counterclockwise rotation
+             phaseAmplitude [float] - amplitude of phase curve
+             t_char [float] - characteristic model size in days
+             rBLR [float] - characteristic model size in μas
+             FHWM [float] - full width half max of line profile in km/s
+    """
+
+    νCenters,LP,meanPhase,delays,t_char,rBLR = getModelProducts(θ,bins,nr,nϕ)
+    
+    #identify single peak in LP
+    LPmaxInd = argmax(LP)
+    buffer = Int(round(bins/100))
+    singlePeak = true; doublePeak = false
+    if findfirst(LP.>0) == nothing || findlast(LP.>0) == nothing
+        singlePeak = false
+        doublePeak = false
+        #error tag for no flux in line profile
+        return singlePeak,doublePeak,"none",0,t_char,rBLR,-1
+    end
+    nonZeroL = LPmaxInd-findfirst(LP.>0); nonZeroR = findlast(LP.>0)-LPmaxInd
+    centerOffset = buffer; quit = false
+    while (centerOffset<(nonZeroL-buffer)) && (centerOffset<(nonZeroR-buffer)) && (quit == false)
+        Δl = LP[LPmaxInd-centerOffset]-LP[LPmaxInd-(centerOffset+1)]; Δr = LP[LPmaxInd+centerOffset]-LP[LPmaxInd+(centerOffset+1)]
+        if Δl<0 || Δr<0 #as we move away from center, LP should always decrease for single peak
+            singlePeak = false
+            doublePeak = true
+            quit = true
+        end
+        centerOffset += 1
+    end
+
+    #identify rotation in S-curve in phase profile, record amplitude
+    lMask = νCenters.<0; rMask = νCenters.>0
+    lPhase = sum(meanPhase[lMask])/sum(lMask); rPhase = sum(meanPhase[rMask])/sum(rMask)
+    rotation = "cw"
+    if lPhase>rPhase
+        rotation = "ccw"
+    end
+    phaseAmplitude = maximum(meanPhase)-minimum(meanPhase)
+
+    #get FWHM of line profile
+    lHalf = findfirst(LP.>0.5); rHalf = findlast(LP.>0.5)
+    FHWM = νCenters[rHalf]-νCenters[lHalf] #km/s
+
+    return singlePeak,doublePeak,rotation,phaseAmplitude,t_char,rBLR,FHWM
+end
+    
+function genTaggedData(nSamples::Int,fOut = "tagged_samples.csv"; gridSearch = false,bins::Int=100,nr::Int=256,nϕ::Int=512)
+    """generate tagged model data
+    params: nSamples [int] - number of samples to generate
+            fOut [str] - filename to save tagged data to
+            gridSearch [bool] - if true, generate samples on a grid, otherwise generate random samples
+            bins [int] - number of bins to use for histogramming
+            nr [int] - number of radial bins to use for model
+            nϕ [int] - number of angular bins to use for model
+    returns: none, but saves output to fOut for further analysis
+    """
+
+    #generate random samples from parameter space
+    s = time()
+    open(fOut,"w") do f
+        write(f,"i,r̄,Mfac,rFac,f1,f2,f3,f4,pa,Sα,singlePeak,doublePeak,rotation,phaseAmplitude,t_char,rBLR,FHWM\n")
+    end
+    if gridSearch
+        nPerParam = Int(floor(nSamples^(1/10))) #number of samples per parameter, 10D parameter space
+        if nPerParam < 2
+            print("nSamples too small for grid search (need at least 2^10) reverting to random sampling\n")
+            gridSearch = false
+        else
+            i = range(0,stop=90,length=nPerParam); r̄ = range(500,stop=5e4,length=nPerParam); Mfac = range(0.05,stop=5,length=nPerParam); rFac = range(2,stop=100,length=nPerParam); f1 = range(0,stop=1,length=nPerParam); f2 = range(0,stop=1,length=nPerParam); f3 = range(0,stop=1,length=nPerParam); f4 = range(0,stop=1,length=nPerParam); pa = range(0,stop=360,length=nPerParam); Sα = range(-2,stop=2,length=nPerParam)
+            nSamples = nPerParam^10    
+        end
+        counter = 0
+        for ii in i
+            for r̄i in r̄
+                for Mfaci in Mfac
+                    for rFaci in rFac
+                        for f1i in f1
+                            for f2i in f2
+                                for f3i in f3
+                                    for f4i in f4
+                                        for pai in pa
+                                            for Sαi in Sα
+                                                θ = [ii,r̄i,Mfaci,rFaci,f1i,f2i,f3i,f4i,pai,Sαi]
+                                                singlePeak,doublePeak,rotation,phaseAmplitude,t_char,rBLR,FHWM = tagModelProducts(θ,bins,nr,nϕ)
+                                                open(fOut,"a") do f
+                                                    write(f,"$ii,$r̄i,$Mfaci,$rFaci,$f1i,$f2i,$f3i,$f4i,$pai,$Sαi,$singlePeak,$doublePeak,$rotation,$phaseAmplitude,$t_char,$rBLR,$FHWM\n")
+                                                end
+                                                counter+=1
+                                                print(" "^100*"\r")
+                                                print("$(round(100*counter/nSamples,sigdigits=2)) % complete\r")
+                                                GC.gc()
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if !gridSearch
+        for n=1:nSamples
+            i = rand(Uniform(0,90)); r̄ = rand(Uniform(500,5e4)); Mfac = rand(Uniform(0.05,5)); rFac = rand(Uniform(2,100)); f1 = rand(Uniform(0,1)); f2 = rand(Uniform(0,1)); f3 = rand(Uniform(0,1)); f4 = rand(Uniform(0,1)); pa = rand(Uniform(0,360)); Sα = rand(Uniform(-2,2))
+            θ = [i,r̄,Mfac,rFac,f1,f2,f3,f4,pa,Sα]
+            singlePeak,doublePeak,rotation,phaseAmplitude,t_char,rBLR,FHWM = tagModelProducts(θ,bins,nr,nϕ)
+            open(fOut,"a") do f
+                write(f,"$i,$r̄,$Mfac,$rFac,$f1,$f2,$f3,$f4,$pa,$Sα,$singlePeak,$doublePeak,$rotation,$phaseAmplitude,$t_char,$rBLR,$FHWM\n")
+            end
+            print(" "^100*"\r")
+            print("$(round(100*n/nSamples,sigdigits=2)) % complete\r")
+            GC.gc()
+        end
+    end
+    f = time()
+    println("$(round(f-s,sigdigits=2)) seconds to generate $nSamples samples") #takes several hours to produce meaningful amounts of data
+end
+</code></pre>
+    Using this code we can generate a large sample of model data &dash; for this project we will use one coarse grid search (59,050 entries) and a larger random search (118,100 entries) for a total of 177,150 tagged models.
+    Below we can see a sample of what this "raw" data looks like:
+    </p>
+    <div class="container-fluid">
+        <main class="row">
+            <div class="col">
+                <div id="tagged_samples"></div>
+            </div>
+        </main>
+    </div>
+    <p>
+        Since we generated this data ourselves there's a lot less cleaning we have to do, but in tagging the data during generation if a model did not have a "single" or "double" peak both were set to false. This is a distinguishing feature in quasar spectra,
+        thus for any models that can't be clearly put in either category we will probably want to throw them out. 
+        We'll also want to double check and make sure no values are "NaN", and that the values in the "phaseAmplitude", "t_char", "rBLR", and "FHWM" columns are not zero, as this can also happen if the randomly chosen model parameters happen to be non-physical. 
+        We can again do this with pandas in python:
+        <pre><code class="language-python">
+import pandas as pd
+import numpy as np
+CSVList = ['tagged_samples_grid.csv','tagged_samples_random.csv']
+combined_df = pd.concat([pd.read_csv(f) for f in CSVList])
+combined_df.dropna(inplace=True)
+mask = ((combined_df['singlePeak'] == False) & (combined_df['doublePeak'] == False)) | (combined_df['FHWM'] == 0.0) | (combined_df['phaseAmplitude'] == 0.0) | (combined_df['t_char'] == 0.0) | (combined_df['rBLR'] == 0.0)
+combined_df.drop(combined_df[mask].index,inplace=True)
+combined_df.to_csv("tagged_samples.csv",index=False)
+        </code></pre>
+        This leaves us with just over 60,000 tagged models, which is a pretty big drop, but hopefully still a large enough sample to be useful for our purposes and simply the result of brute-force randomly searching through the model parameter space. A sample of the cleaned data is shown below:
+    </p>
+    <div class="container-fluid">
+        <main class="row">
+            <div class="col">
+                <div id="tagged_samples_clean"></div>
+            </div>
+        </main>
+    </div>
+    <div class="leftWrapFigure">
+        <p><img src="img/tagged_samples_boxPlot.jpg" alt="Boxplot of tagged model data" width=100% height=auto>
+            <figcaption>Boxplot of tagged model data.</figcaption>
+        </p>
+    </div>
+    <p>
+        We can again apply our <code>visualizeDF</code> function from before to generate a simple boxplot of these data, which is shown at left. Here we compare the "single" and "double" peaked populations against each other, and notice a few interesting trends.
+        First, we notice that the single-peaked population has a tighter preferred inclination range, something expected given the mathematics behind the model. We also see that having a higher value of the "f4" parameter is 
+        correlated with a double peak while the opposite is true for the "f1" parameter, which is also expected from the mathematics of the model. More surprisingly, we notice the single-peaked population prefers the model size to be larger, and also prefers that the power-law index of emission be slightly higher than that for double-peaked models.
+    </p>
+    <p>
+        But what do these models look like? Here we are modelling the broad emission lines seen in the quasar spectra before, but focusing on just a single emisson line instead of the entire spectrum. 
+        The model here allows us to create a wide variety of emission line profiles from a few physical parameters, as shown in the following figure:
+        <div class="rightWrapFigure">
+            <p>
+            <img src="img/models.jpg" alt="Various possible line profiles created with the model" width=100% height=auto>
+            <figcaption>
+                Various possible line profiles created with the model. The model parameters used to create each line profile are shown in the legend. Notice that "f4" creates a strong double peak while "f1" creates a strong single peak as discussed above. The left panel shows the effects of each model term in isolation, while the right panel showcases how different terms interplay to create more interesting shapes.
+            </figcaption>
+            </p>
+        </div>
+            We would like to explore which physical regions of the model parameter space best correspond to the kinds of shapes seen in quasar spectra from SDSS, which the generated tagged data should allow us to do.
+    </p>
+    <div class="leftWrapFigure">
+        <p>
+        <img src="img/model_t.jpg" alt="Time lag model comparisons" width=100% height=auto>
+        <figcaption>
+            Time lag model comparisons. Two models (red and green) with nearly identical line profiles (bottom) are shown to have markedly different characteristic response curves (right).
+        </figcaption>
+        </p>
+    </div>
+
+    <p>
+        The model data also has time information encoded into it, and this allows for a more tentative and exciting comparision to the SDSS data. The emission lines in quasars are assumed to be powered by the central black hole, which can change in brightness as it eats faster or slower.
+        These changes in brightness can then be reflected in the emission lines, which are produced by gas orbiting further out, with a time lag based on the speed it takes for the change in illumination to propagate outwards (usually assumed to be the speed of light). 
+        This means that if we can measure the time delay between the change in brightness of the central black hole and the change in brightness of the emission lines, we can measure the size of the region producing the emission lines.
+        SDSS has observed many of the quasars in the dataset collected above more than once, and we can compare the spectra of the same quasar taken at different times to see if we can estimate this time delay. This time delay is also velocity dependent across the width of the line, so some parts may respond quicker (closer in) than others (farther out).
+        Thus in our tagged model spectra we also include some time information about the models, which we can use to compare to the SDSS data. This provides another opportunity to discriminate between models, as the figure at left shows. 
+    </p>
+
 
 
 
@@ -236,8 +660,8 @@ getSpectrum(firstGalID) # returns url of spectrum, downloads spectrum to spectra
     <script src="js/csv_to_html_table.js"></script>
 
     <script>
-        var CSVList = ['data/QSO_querySample.csv'];
-        var idList = ['sampleQueryData'];
+        var CSVList = ['data/QSO_querySample.csv','data/combined_wSizeSample.csv','data/tagged_samples_random_sample.csv','data/combined_cleanedSample.csv'];
+        var idList = ['sampleQueryData','sampleQueryDataClean','tagged_samples','tagged_samples_clean'];
         // function format_link(link) {
         //     if (link)
         //         return "<a href='" + link + "' target='_blank'>" + link + "</a>";

@@ -74,6 +74,14 @@ body {
     .tabscontent {
         float: none;
     }
+    .leftWrapFigure{
+        float: none;
+        width: 100%;
+        margin: 0px 0px 20px 0px;
+        font-size: smaller;
+        font-style: italic;
+        text-align: left;
+    }
 }
 
 /* create content class, aligned to tabs and banner (should span the same amount of page) */
@@ -123,6 +131,15 @@ th {
     font-style: italic;
     text-align: left;
 }
+
+.rightWrapFigure {
+    float: right;
+    width: 50%;
+    margin: 0px 50px 20px 0px;
+    font-size: smaller;
+    font-style: italic;
+    text-align: left;
+}
 img.scaled {
     width: 100%;
     height: auto;
@@ -147,13 +164,23 @@ img.scaled {
     margin: 0 10px
 }
 .centerFigure1{
-    display: flex;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
     justify-content: center;
+    font-size: smaller;
+    font-style: italic;
+    text-align: left;
 }
 .centerFigure1 img{
     width: 90%;
+    display: block;
     height: auto;
     margin: 0 10px
+}
+.centerFigure1 figcaption{
+    align-self: flex-end;
 }
 
 /* set list spacing */
