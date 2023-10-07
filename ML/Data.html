@@ -310,7 +310,7 @@ getImg(firstGalID) # returns url of image, downloads image to images/image_{spec
             We must also append the spectral identifiers to the url via the "spec", "plateid", "mjd", "fiberid", and "run2d" parameters. We'll again accomplish all of this via a custom Python function that will return the spectrum in the format we want based on an "id" dictionary (like we created above):
         </p>
         <div class="leftWrapFigure">
-            <p><img src="img/spectrum_299489677444933632.png" alt="SDSS galaxy spectrum" width="512" height=auto>
+            <p><img src="img/spectrum_299489677444933632.png" alt="SDSS galaxy spectrum" width=100% height=auto>
                 <figcaption>Sample SDSS galaxy spectrum quick-look downloaded with <code class="language-python">getSpectrum</code>.</figcaption>
             </p>
         </div>
@@ -339,7 +339,7 @@ getSpectrum(firstGalID) # returns url of spectrum, downloads spectrum to spectra
             If we opt to download the spectrum as a CSV or FITS file we can access the individual flux values obtained by the instrument at every wavelength, which is useful because we may want to compare just portions of the spectra (i.e. where a strong common spectral line exists) from one object to another.
         </p>
         <div class="leftWrapFigure">
-            <p><img src="img/sampleSpectrumData.png" alt="SDSS galaxy spectrum" width="512" height=auto>
+            <p><img src="img/sampleSpectrumData.png" alt="SDSS galaxy spectrum" width=100% height=auto>
                 <figcaption>The same galaxy spectrum from before, this time visualized as a few of the actual data rows (in total there are 3818 rows of data) obtained with<code class="language-python">getSpectrum(firstGalID,format='csv')</code>.</figcaption>
             </p>
         </div>

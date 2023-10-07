@@ -1,0 +1,16 @@
+Imaging band with greatest flux,Spectroscopic band with greatest flux,Object type,Distance
+u,spectroSynFlux_z,GALAXY,close
+g,spectroSynFlux_z,STAR,close
+u,spectroSynFlux_z,QSO,close
+u,spectroSynFlux_z,QSO,far
+u,spectroSynFlux_z,GALAXY,close
+u,spectroSynFlux_z,GALAXY,close
+u,spectroSynFlux_i,QSO,far
+u,spectroSynFlux_z,GALAXY,close
+u,spectroSynFlux_z,STAR,close
+u,spectroSynFlux_z,GALAXY,close
+u,spectroSynFlux_z,QSO,far
+u,spectroSynFlux_z,GALAXY,close
+u,spectroSynFlux_z,GALAXY,close
+u,spectroSynFlux_z,STAR,close
+u,spectroSynFlux_z,GALAXY,close

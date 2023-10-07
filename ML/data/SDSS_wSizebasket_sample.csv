@@ -1,0 +1,16 @@
+Imaging band with greatest flux,Spectroscopic band with greatest flux,Object type,Distance,Imaging band with largest size
+g,spectroSynFlux_z,GALAXY,close,petroRad_g
+u,spectroSynFlux_z,STAR,close,petroRad_z
+u,spectroSynFlux_z,QSO,close,petroRad_g
+u,spectroSynFlux_z,QSO,far,petroRad_u
+u,spectroSynFlux_z,GALAXY,close,petroRad_u
+u,spectroSynFlux_z,GALAXY,close,petroRad_i
+u,spectroSynFlux_z,QSO,far,petroRad_u
+u,spectroSynFlux_z,GALAXY,close,petroRad_g
+u,spectroSynFlux_z,STAR,close,petroRad_u
+u,spectroSynFlux_z,GALAXY,close,petroRad_i
+r,spectroSynFlux_i,QSO,far,petroRad_z
+u,spectroSynFlux_z,GALAXY,close,petroRad_u
+u,spectroSynFlux_z,GALAXY,close,petroRad_r
+u,spectroSynFlux_i,STAR,close,petroRad_u
+u,spectroSynFlux_z,GALAXY,close,petroRad_r
