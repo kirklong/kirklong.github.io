@@ -242,6 +242,50 @@ def genResults(DTfile = "DTMCMCData.csv",testSize=0.3,forest=False,maxDepth=3):
             Discuss, illustrate, describe, and visualize the results. Include the confusion matrix and the accuracy. Create and include at least three different trees.
         </p> -->
         <p>
+            What do the individual trees look like? Here are the results for the DiskWind data:
+        </p>
+        <div class="centerFigure1">
+            <img src="img/DT_MCMC.png">
+            <figcaption>Decision tree for DiskWind model data with a max depth of three.</figcaption>
+        </div>
+        <p>
+            This is kind of a mess, but some trends can still be seen. First, we notice that the right most path is essentially increasing \(f_1\) and \(i\), which 
+            analytically we expected to be assigned to single peaked models and indeed the tree finds this as well, and it also shows that \(f_4\) should conversely be 
+            small if the inclination is relatively low and we want to produce a single peak. The left side of the tree is more confusing, as the FHWM, phase amplitude, 
+            and mean disk size \(\bar{r}\) should all be more related to the breadth and strength of the line profile but not neccasarily whether it is single or double peaked.
+            This could be an artifact of their simply being more single peaked models in the data, but it's also possible that the decision tree algorithm is picking up on
+            some subtle correlations that we don't see by eye. 
+        </p>
+        <p>On to the SDSS dataset &mdash; first we will look at the tree for the dataset with sizes:</p>
+        <div class="centerFigure1">
+            <img src="img/DT_SDSS_wSize.png">
+            <figcaption>Decision tree for the SDSS data (with sizes) with a max depth of three.</figcaption>
+        </div>
+        <p>
+            Again this is kind of a mess, but we can see the classifier is actually using the sizes to discriminate between the classes! For example,
+            following the dark orange track on the right we have large(ish) red size, relatively bright in longer wavelengths, and larger infrared sizes yielding 
+            a galaxy classification, all of which make conceptual sense. Likewise the purple track on the far left basically is showing us that if the object is 
+            pretty bright, it's probably a star, which also makes sense. Unpacking the rest of the tree is a bit more difficult and likely would require a larger 
+            max depth to really get a sense of what's going on, but the visualizations quickly become unwieldly.
+        </p>
+        <p>
+            Finally, we can look at the tree for the SDSS data without sizes: 
+        </p>
+        <div class="centerFigure1">
+            <img src="img/DT_SDSS_noSize.png">
+            <figcaption>Decision tree for the SDSS data (without sizes) with a max depth of three.</figcaption>
+        </div>
+        <p>
+            This is about as confusing as the one with sizes, but we can again spot some general trends. On the leftmost branch we essentially have brighter and 
+            brighter spectral fluxes in the bluer wavelength bands, and as expected we can see that this is correlated with a galaxy classification. Likewise if we fail
+            the first node there we follow the purple tracks, which tell us if we're not bright spectroscopically but we are bright optically we are probably a star! And 
+            at the bottom left node, we see that to split off the galaxy track and become a quasar we need to not be as bright as a galaxy spectroscopically (but still pretty bright)
+            and be bright in the redder colors optically as expected. The right side green track shows us similarly that quasars have an expected magnitude range on the bluer
+            side of things, but it's interesting that it doesn't use the red instead to make this classification. The far right (purple and orange) tracks do not seem to be 
+            very pure and thus are likely still too high up the tree to glean useful information from. 
+            While it's hard to visualize the trees with the depth needed to really understand what the classifier is doing, the next logical question to ask is how accurate are the full trees? 
+        </p>
+        <p>
             When running the decision tree algorithm on the DiskWind data we were able to achieve a test accuracy of 91% when using a single tree, and 94% when using 
             a random forest ensemble. When running the algorithm on the SDSS data (with and without sizes) we achieved a test accuracy 98% from a single tree and 99%
             when using a random forest ensemble. Note that this depends a litle bit on what fraction of the data we train versus test with, but it seems even putting just 10% of the data 
