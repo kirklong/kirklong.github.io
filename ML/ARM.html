@@ -207,18 +207,17 @@ SDSS_noSize_rules_lift <- sort(SDSS_noSize_rules, by="lift", decreasing=TRUE)
             </div>
         </p>
         <p>
-            What does this show us? Well, as expected, quasars are often found very far away from us. Somewhat surprisingly,
-            this also seems to be correlated with objects that are brightest in the UV, which is not expected as usually objects far
-            away are redder. Upon further inspection, however, the support for this rule is pretty low, and thus 
-            it's likely an artifact of small sample size and not a true trend (the true trend is just that quasars are far!).
-            The z band corresponds to infrared (the reddest possible band in the SDSS survey), and we see that as expected
-            this is also correlated with an object being far away and being a quasar. 
+            What does this show us? Well, as expected, quasars are often found very far away from us. This also seems to be correlated with objects 
+            that have the highest magnitude in the UV, which is expected as usually objects far
+            away are redder and more negative magnitudes are brighter. Upon further inspection, however, the support for this rule is pretty low, and thus 
+            it's likely an artifact of small sample size and not a true trend, and we really should have taken the minimum magnitude and not the maximum, but oh well.
+            For example, the z band corresponds to infrared (the reddest possible band in the SDSS survey), and we see that 
+            this is also correlated with an object being far away and being a quasar, when in reality red quasars should emit plenty of light here. 
         </p>
         <p>
             Galaxies are seen to be correlated with being close
-            and genuinely brighter in the u imaging band, but interestingly they are also correlated with being spectroscopically brightest again in the z band.
-            This is likely due to the fact that there are bright emission lines from Hydrogen in the infrared even at low redshifts,
-            thus both quasars and galaxies are associated with being brightest in the z band spectroscopically.
+            and genuinely fainter in the u imaging band, but interestingly they are also correlated with being spectroscopically faintest again in the z band.
+            This is likely due to the fact that there are bright emission lines from Hydrogen, which are strongest (at low redshift) in closer to optical wavelengths.
         </p>
         <p>
             Similar results are true for stars in the dataset with slightly lower lift, thus they are shown in the table but not in the visualizations.
@@ -252,8 +251,8 @@ SDSS_noSize_rules_lift <- sort(SDSS_noSize_rules, by="lift", decreasing=TRUE)
         </p>
         <p>
             Looking lower in the rules list we see that stars are associated with being largest in size in the ultraviolet in addition to being close 
-            and brightest in the ultraviolet. This is expected given that the easiest stars to observe are massive, hot stars and they will
-            naturally have most of their emission in the UV. 
+            and faintest in the ultraviolet. This is expected given that the most commonly observed stars are red, but its interesting that the 
+            largest size is in the UV.
         </p>
         <p>
             It's also important to note that quasars in general have the strongest associations with observables, and this is good news for the rest of the 
