@@ -1,31 +1,379 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Machine Learning Project</title>
-    <link rel="stylesheet" type="text/css" href="css/styles.css">
-</head>
-<body>
-    <div class="banner">
-        <h1>Machine Learning Project</h1>
-        <div class="tabs">
-            <a href="HomePageIntro.html">Introduction</a> 
-            <a href="Data.html">DataPrep/EDA</a>
-            <a href="Clustering.html">Clustering</a>
-            <a href="ARM.html">ARM</a>
-            <a href="DT.html">DT</a>
-            <a href="NB.html">NB</a>
-            <a class = "active",href="SVM.html">SVM</a>
-            <a href="Regression.html">Regression</a>
-            <a href="NN.html">NN</a>
-            <a href="Conclusions.html">Conclusions</a>
+    <head>
+        <title>Machine Learning Project</title>
+        <!-- pretty table loading -->
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1, shrink-to-fit=yes" name="viewport">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+        crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+        <!-- end pretty table requirements -->
+        <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+        </script>
+        <link rel="stylesheet" type="text/css" href="css/styles.css">
+        <link href="css/prism.css" rel="stylesheet" />
+    
+    
+    </head>
+    <body>
+        <script src="js/prism.js"></script>
+        <div class="banner">
+            <h1>Machine Learning Project</h1>
+            <div class="tabs">
+                <a href="HomePageIntro.html">Introduction</a> 
+                <a href="Data.html">DataPrep/EDA</a>
+                <a href="Clustering.html">Clustering</a>
+                <a href="ARM.html">ARM</a>
+                <a href="DT.html">DT</a>
+                <a href="NB.html">NB</a>
+                <a class = "active" href="SVM.html">SVM</a>
+                <a href="Regression.html">Regression</a>
+                <a href="NN.html">NN</a>
+                <a href="Conclusions.html">Conclusions</a>
+            </div>
         </div>
-    </div>
-    <div class="content">
-        <h2>Support Vector Machines</h2>
-        <p>
-            Lorem Ipsum dolor...
-        </p>
-    </div>
-</body>
+        <div class="content">
+            <h2>Support Vector Machines</h2>
+            <h3>Overview</h3>
+            <div class = "leftWrapFigure">
+                <figure>
+                    <img src="img/SVMExplainerWiki.png" alt="SVM example" style="width:100%">
+                    <figcaption>Figure 1: Basic illustration of the principle behind SVMs &mdash; here two classes of data are best fit by the red line, as this maximizes the margin between the two classes.
+                        Data points that lie on the margin are called "support vectors", as they produce the dashed parallel lines.
+                    Image from <a href="https://commons.wikimedia.org/wiki/File:SVM_margin.png">Wikipedia</a>.
+                    </figcaption>
+                </figure>
+            </div>
+            <p>
+                Support Vector Machines (SVMs) are a supervised learning method that can be used for both classification and regression (although here we will just use them for classification). SVMs are 
+                linear separators, meaning that they can be used to separate data using lines. For example, given two classes, the SVM algorithm will find the line that best separates the data, with one class falling on one side
+                and the other class falling on the other side, as shown in the image at left. It is a simple and elegant idea, and in a sense SVMs are similar to simply fitting a line to data i.e. via least squares regression, but instead of minimizing the 
+                distance between the line and the data SVMs maximize the distance between the line and the data (as split into classes). This distance is called the margin, and the line that maximizes the margin is the optimal line. 
+                Note also that, while shown as a straight line in the image, SVMs place no restriction on what kind of line can be used to separate the data &mdash; the line can be a polynomial as well, for example. 
+                Often our data are not as nicely separated as in the image in their "natural" parameter space, thus SVMs often transform input data into a higher dimensional space, where it will be easier to sepearate the data. 
+                The separators in this higher dimensional space are then hyperplanes, but they are natural extensions of the simple line example shown in figure 1. SVMs are inherently binary classifiers,
+                meaning that they can only separate two classes at a time. However, they can be extended to multi-class classification problems by applying the algorithm multiple times, either by performing 
+                one vs all classification for each class or by performing one vs one classification for each pair of classes and then combining the results.
+            </p>
+            <p>
+                But how do we transform the data into a higher dimensional space? 
+                SVMs use a "kernel" function to do this. The kernel function is a function that takes two data points and returns the value of their dot product in the higher dimensional space. 
+                Dot products measure the similarity between two vectors, and so the kernel function is a measure of similarity between two data points in whatever higher dimensional space is easiest to separate them in. 
+                This works because of the "kernel trick", which is a bit of mathematical "trickery" that shows that the dot product of two vectors in a higher dimensional space can be calculated w
+                ithout actually transforming the vectors into that higher dimensional space &mdash; this is a very useful trick, as transforming coordinate systems is often computationally expensive, and without 
+                the kernel trick SVMs would not be trainable on large datasets in an acceptable amount of time. Consider the simple example shown in the next figure, where we again have tjust two classes of data but this time 
+                one class corresponds to points interior to same radius and the other class corresponds to points outside of the radius. In the original two dimensions (x and y) there is no line that can be easily drawn to
+                separate the classes, but if we transform the data into just one higher dimension (z), where the z coordinate of each point is set based on its two-dimensional distance from the origin,
+                then we can easily separate the data with a plane that imposes a cutoff at a certain z value (which corresponds to a certain radius in the original two dimensions). Figure 2 essentially shows 
+                exactly this, where the left panel shows the original data in two dimensions and the right panel shows the data in three dimensions, where the third dimension is the squared distance from the origin 
+                in the original two dimensions and a hyperplane is drawn to separate the data. What would the kernel here be? For the distance in the original two dimensions the corresponding kernel would simply be the 
+                dot product of the two vectors, i.e. \(x \cdot y\), and in our transformed three dimensional space we simply need to add an additional term to account for the squared distance from the origin, thus 
+                the kernel for the higher dimensional space in this example is simply \(x \cdot y + ||x||^2||y||^2\) as \(x^2 + y^2\) is the squared distance from the origin in the original two dimensions.
+            </p>
+            <div class = "leftWrapFigure">
+                <figure>
+                    <img src="img/SVMKernelTrick.png" alt="SVM example" style="width:100%">
+                    <figcaption>Figure 2: Basic illustration of the "kernel" trick, showcasing how data that initially seems impossible to separate with a single line/plane can be cast to higher dimensions and easily separated.
+                        Here the kernel transforms the data from two dimensions (x and y) to three dimensions, where the new third dimension is equal to the squared distance from the origin in the original two dimensions (\(r^2\)). 
+                        This produces the new data points shown in the right panel, which can be easily separated by the greenish yellow plane, the projection of which is the circular feature in the left panel (blue points are above the 
+                        hyperplane in the right panel while orange points are below it). Image from <a href=https://en.wikipedia.org/wiki/Kernel_method#/media/File:Kernel_trick_idea.svg>Shiyu Ji</a>.
+                    </figcaption>
+                </figure>
+            </div>
+            <p>
+                This is a very specific example, and in general it is not obvious what the kernel function should be for a given dataset. There are a few common choices, however, including: 
+                <ul>
+                    <li>Linear: \(x \cdot y\)&mdash; this is the simplest possible kernel, corresponding to our original example of a straight line separating the data.</li>
+                    <li>Polynomial: \((x \cdot y + c)^d\)&mdash; like the linear kernel (which is just the polynomial kernel with c = 0 and d = 1), but with a polynomial term added to the dot product, as well as the potential for inhomogeneity (c), 
+                        allowing for more complex separators than just straight lines in the original dimensions.</li>
+                    <li>Radial Basis Function (RBF): \(e^{-\gamma||x-y||^2}\) (\(\gamma > 0\))&mdash; this kernel is a bit more complicated, but it is very useful as it allows for non-linear separators in the original dimensions. 
+                        The kernel is a function of the distance between the two points, and the gamma parameter controls how quickly the kernel falls off with distance. This is the default parameter for the python scikit-learn implementation of SVMs.</li>
+                    <li>Sigmoid function: \(\tanh(\kappa x\cdot y + c)\) (\(\kappa > 0 \) and \(c < 0\)) &mdash; the hyperbolic tangent is a sigmoid function bounded by -1 and 1, and this kernel compares how similar x and y are 
+                    when bounded by a hyperbola.</li>
+                </ul>
+            </p>
+            <p>
+                While the above examples are all different methods for drawing separators in the original dimensions, they are all linear separators in the higher dimensional spaces they correspond to. Further, while they 
+                are all different, they all critically rely on the dot product between two vectors in the original dimension, illustrating what a critical role the dot product plays in SVMs and why the kernel trick is so important.
+                Also, while all our examples thus far have been in 2D, we also are not restricted to the input data having to be in two dimensions &mdash; the dot product between two vectors can be calculated in any number of dimensions, 
+                and so the kernel trick can be used to cast data into any number of dimensions equal to or higher than the original. 
+                To illustrate this let's consider a specific, more complicated example, where we again have points in 2D space but this time we want to cast them to a higher dimensional space using the polynomial kernel with d = 2 and c = 1. 
+                Our formula for a polynomial kernel with these parameters is \((x \cdot y + 1)^2\) &mdash; expanding this out we get \((x\cdot y)^2 + 2x\cdot y + 1\). If our vectors x and y are both 2D they will have components 
+                \(x = (x_1,x_2)\) and \(y = (y_1,y_2)\). Explicitly plugging this into our result above, we can then equivalently write:
+                $$(x \cdot y + 1)^2 = (x_1y_1 + x_2y_2)^2 + 2(x_1y_1 + x_2y_2) + 1 = \boxed{(x_1y_1)^2 + (x_2y_2)^2 + 2x_1y_1x_2y_2 + 2x_1y_1 + 2x_2y_2 + 1}$$
+                This can equivalently be written as the dot product between two 6D vectors:
+                $$(x_1y_1)^2 + (x_2y_2)^2 + 2x_1y_1x_2y_2 + 2x_1y_1 + 2x_2y_2 + 1 = (x_1^2,x_2^2,\sqrt{2}x_1x_2,\sqrt{2}x_1,\sqrt{2}x_2,1)\cdot(y_1^2,y_2^2,\sqrt{2}y_1y_2,\sqrt{2}y_1,\sqrt{2}y_2,1)$$
+                Thus the polynomial kernel is equivalent to casting our 2D input data into a six dimensional space, where the first two dimensions are equal to the squared values of the original components, 
+                the third dimension is proportional to the product of the two original components, the fourth and fifth dimensions are simply the original components rescaled, and the last dimension is a constant (unity). 
+                For example, given the input vector \(x = (1,2)\) we can calculate the corresponding vector in the higher dimensional space given by our polynomial kernel as:
+                $$(1,2)\rightarrow(1^2,2^2,2\sqrt{2},\sqrt{2},2\sqrt{2},1) = \boxed{(1,4,2\sqrt{2},\sqrt{2},2\sqrt{2},1)}$$
+                Say we have another vector \(y = (3,4)\) &mdash; which would equivalently correspond to the vector \((9,16,12\sqrt{2},3\sqrt{2},4\sqrt{2},1)\) in the higher dimensional space. We can use these two vectors to 
+                test the "kernel trick", which tells us that the dot product between these two vectors in the higher dimensional space should be equal to the polynomial kernel evaluated on the two original vectors in the original space.
+                Explicitly, the dot product between the two vectors in the higher dimensional space is:
+                $$(1,4,2\sqrt{2},\sqrt{2},2\sqrt{2},1)\cdot(9,16,12\sqrt{2},3\sqrt{2},4\sqrt{2},1) = 9 + 64 + 48 + 6 + 16 + 1 = \boxed{144}$$
+                While the polynomial kernel evaluated on the two original vectors in the original space is:
+                $$((1,2)\cdot (3,4) + 1)^2 = (3+8+1)^2 = 12^2 = \boxed{144}$$
+                We see that, as promised, the dot product between the two vectors in the higher dimensional space is equal to the polynomial kernel evaluated on the two original vectors in the original space, and the kernel trick works!
+            </p>
+            <p>
+                This is why the dot product is so important to SVMs &mdash; the kernel function (regardless of choice of kernel) is a function of the dot product between two vectors in their original dimensions. The kernel allows us 
+                to cast our data into a higher dimensional space where it is easier to separate, allowing the model to pick out subtle differences in the training data that can then be used to classify new data. Without the kernel trick and the dot product SVMs would not be a viable machine learning algorithm, as this 
+                significantly reduces the computational cost of training the model. 
+            </p>
+            <h3>Data prep</h3>
+            <p>
+                Because SVMs critically rely on the dot product between data vectors, SVMs can only work on numeric data. SVMs also require that the data be labelled, as in maximizing the margin between the two classes the algorithm
+                needs to know which points belong to which class (want to maximize the number of points on the "right" side of the separating plane). Thus, we need to make sure that our data is numeric and labelled.
+                This is good for us, as our data is already numeric and has labels! In fact, the process we used to prepare our data for decision trees is exactly the same as what we need to do to prepare our data for SVMs. 
+                This process is fully detailed on the <a href="DT.html">Decision Tree page</a>, but in short we need to:
+                <ul>
+                    <li>Remove any columns that are not numeric or are not useful for classification. For the SDSS data this includes the object ID fields, the coordinate fields, and the fiber/processing fields. 
+                        For the DiskWind model data we will just drop the rotation column, and again combine the "singlePeak" and "doublePeak" columns into one single label.
+                    </li>
+                    <li>Remove all of the error columns &mdash; in our original data cleaning we already used these columns to make a cut based on data quality, and we want the model to learn from the measurements 
+                        themselves, not their errors. 
+                    </li>
+                    <li>Split the data into a training set and a testing set. As before we will use <code>train_test_split</code> from 
+                        <a href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html">scikit-learn</a> to accomplish this with a default test set size of 30%.
+                    </li>
+                </ul>
+            </p>
+            <p>While this is also shown on the <a href="DT.html">DT tab</a>, a sample of what the training data looks like for the SDSS dataset with sizes is shown below 
+                (the training data and training labels are concatenated to display in a single table, with the labels in the leftmost column). 
+                This is likewise a representative sample of what the prepared data for SVMs looks like, and the testing dataset is also
+                very similar (although disjoint and &mdash; by default 70% larger in size &mdash; from the training data). It's important that they be disjoint because we don't want our model to "cheat" and 
+                learn the labels of the testing data from the training data &mdash; we want to see how well it can generalize to new data.</p>
+            <div class="container-fluid">
+                <main class="row">
+                    <div class="col">
+                        <div id="SDSS_wSize_DT_sample"></div>
+                    </div>
+                </main>
+            </div>
+            <p>
+                The prepared data for the SDSS without sizes looks very similar to what is shown above, but with the size columns removed. The DiskWind data has been similarly prepared, but is omitted from being shown here for the sake of space.
+                Full data product samples for all the datasets (including the training and testing splits) are available at the <a href="https://github.com/kirklong/MLProject/tree/main/SVM">GitHub repository</a> for the project
+                (note that the data samples here are essentially identical to those in the DT folder as the data formatting process is the same). 
+            </p>
+            <h3>Code</h3>
+            <p>
+                While the math behind SVMs is the most complicated of any of the methods we have explored thus far, scikit-learn makes it just as easy to implement. In general there are a few parameters we are going to try to vary 
+                to see how they affect the performance of our model, so let's wrap the process in a function that easily allows these parameters to be varied:
+                <pre><code class="language-python">
+from sklearn import svm
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+import pandas as pd
+from sklearn.model_selection import train_test_split
+def genResults(dataFile = "SVMMCMCData.csv",testSize=0.3,extraDrop=[],kernel="rbf",C=1.0,gamma="auto",cache_size=1000,degree=3):
+    df = pd.read_csv(dataFile)
+    if "MCMC" in dataFile:
+        cols2drop = ["label"] + extraDrop
+        X = df.drop(columns=cols2drop)
+        Y = df["label"]
+    else:
+        cols2drop = ["class"] + extraDrop
+        X = df.drop(columns=cols2drop)
+        Y = df["class"]
+    Xtrain,Xtest,Ytrain,Ytest = train_test_split(X,Y,test_size=testSize)
+    clf = make_pipeline(StandardScaler(), svm.SVC(kernel=kernel,C=C,gamma=gamma,cache_size=cache_size,degree=degree))
+    clf.fit(Xtrain,Ytrain)
+    Ypred = clf.predict(Xtest)
+    score = clf.score(Xtest,Ytest)
+    return [Xtrain,Xtest,Ytrain,Ytest],Ypred,score
+                </code></pre>
+                This function takes in a data file (assumed to be formatted using the prescription above), a test size (defaulting to using 30% of the input data as training data), a list of columns to drop (additionally from those detailed above in the data prep section), and the parameters for the SVM model. 
+                The paramemters for the SVM model are which kernel we want to use (defaulting to the radial basis function kernel), the cost parameter C (defaulting to 1.0), the gamma parameter 
+                (used if using the RBF kernel, defaulting to setting \(\gamma = 1/n\) where n is the number of features), the cache size (defaulting to 1000 MB), and the polynomial degree (used if using a polynomial kernel, defaulting to 3).
+                There are four built in kernels available &mdash; "linear", "poly", "rbf", and "sigmoid", all of which are described above. The user can also specify their own custom kernel function, 
+                which is another advantage of SVMs over other ML methods, as if you know your data well you can use this to your advantage to create a custom kernel that is optimized for your data. 
+                For example, if you know that your data is well separated by a circle you can use a custom kernel that is a function of the distance from the origin, as in the example above. Unfortunately 
+                we do not know our data well enough to do this, so we will stick to the built in kernels, but it's an interesting possibility to keep in mind.
+                Our function above then reads in the data, drops the columns we don't want, splits the data into training and testing sets, 
+                and then rescales the data + fits the model to the training data, predicting the labels for the testing data. 
+                We've added one extra step here that we haven't done with previous ML models, which is we've wrapped this into a pipeline that first scales the data so that it uniformly falls between 0 and 1 as SVMs are not scale invariant (they rely on the dot product!).
+                It then returns the training and testing data, the predicted labels for the testing data, and the score of the model on the testing data, with the score is simply the fraction of the testing data that the model correctly classified.
+            </p>
+            <p>
+                The most important parameter here that has not yet been explained is the cost paramemter, C. This parameter controls the tradeoff between maximizing the margin between the two classes and minimizing the number of misclassified points.
+                A large C will impart a higher penalty for misclassified points, and so the model will try to minimize the number of misclassified points, but this can come at the expense of the margin. A small C will impart a lower penalty for misclassified points,
+                allowing the model to produce a maximal margin, but this can come at the expense of misclassifying points. Varying this hyperparameter is a good way to over (or under) fit the data. 
+                The default value of 1.0 is a good starting point, but we will try varying this parameter to see how it affects the performance of our model. 
+                The other parameter we have not yet discussed is the cache size &mdash; this has no mathematical significance, but it can affect the speed of training the model as it allows the model to save calculations to memory instead of having to recompute them,
+                but this is obviously limited by the RAM of the computer. The laptop used in these tests has 16 GB of memory, so we set the default at 1 GB to avoid overtaxing the machine while simultaneously allowing a significant chunk of 
+                the calculations to be cached. 
+            </p>
+            <p>
+                To understand how the value of C and which kernel we choose influences our results, we will fit our data using each of the four built in kernels and vary the value of C for the best performing kernel (as determined by the score on the testing data).
+                The full code that accomplishes these goals is available at the <a href="https://github.com/kirklong/MLProject/tree/main/SVM">GitHub repository</a> for the project.
+            </p>
+            <h3>Results</h3>
+            <div class = "leftWrapFigure">
+                <figure>
+                    <img src="img/SVMKernelAccuracy.png" alt="SVM kernel accuracy" style="width:100%">
+                    <figcaption>Figure 3: Plot of accuracy as a function of kernel, showing that the RBF kernel performs the best for all three datasets. 
+                    </figcaption>
+                </figure>
+            </div>
+            <p>
+                The most computationally expensive choice we can make when fitting an SVM is in our choice of kernel. The linear kernel is the simplest, as it is just the dot product between two vectors without any other operations, 
+                and so it is the fastest to compute. On the other end the sigmoid kernel is the most computationally expensive as it requires evaluating the hyperbolic tangent function, which is a relatively expensive operation.
+                As a first step let's see how the choice of kernel affects the performance of our model. We will use the default value of C = 1.0 for all of these tests, as they take quite a while to run, but we will 
+                try each of the four kernels for every dataset. 
+            </p>
+            <p>
+                As the results show, the RBF kernel performed the best for all three datasets. This is not surprising, as the RBF kernel is the most flexible of the four kernels, and this is why it is the default kernel for the scikit-learn SVM implementation.
+                It does take longer to run than the linear kernel, but it is still tractable (and <em>much</em> faster than the worst performing sigmoid kernel, which took roughly a day to run on the SDSS datasets). And you only need to pay the training cost once!
+                If performance were a major concern the linear kernel performed <em>almost</em> as well for either SDSS dataset &mdash; this makes sense as this data already have a relatively high dimensionality with relative independence between parameters, thus we don't need to transform them into a higher dimensional space to effectively separate them.
+                Note that the choice of kernel makes the biggest difference for the DiskWind dataset, likely because it has more parameters that are somewhat correlated (compared with the SDSS data) and it is lower dimensional (thus needing 
+                the kernel to transform it into a higher dimensional space to separate it). In the case of the either SDSS dataset the linear and polynomial kernels perform nearly as well as the RBF kernel, so as mentioned above if performance were a major concern these would be valid choices.
+                For all datasets the sigmoid kernel is by far the worst performer and the most computationally expensive, so it is not a good choice for any of these datasets.
+            </p>
+            <p>
+                But how does varying C affect the results? Let's test different values of C on our best performing kernel, the RBF kernel, to see how it affects the performance of our model for all three datasets.
+                The results are shown in Figure 4, which shows that (as expected) increasing the value of C improves the performance of our model, but there is a clear diminishing return as we increase C. 
+                For the SDSS datasets the performance of the model is great at even C = 0.1, and plateaus quickly at around C = 1. For the DiskWind model increasing C to between 1 and 3 appears to be the sweet spot.
+            </p>
+            <div class = "leftWrapFigure">
+                <figure>
+                    <img src="img/SVMCostAccuracy.png" alt="SVM cost accuracy" style="width:100%">
+                    <figcaption>Figure 4: Plot of accuracy as a function of cost, showing that as more weight is given to minimizing the number of points wrongly classified the accuracy does increase, but
+                        that there is a diminishing returns effect. The optimal value is roughly where the curves plateau. One has to be careful in setting this parameter as too high a value can lead to overfitting 
+                        even if the accuracy appears high (the accuracy can indeed be high, but the model will not generalize well to new data).
+                    </figcaption>
+                </figure>
+            </div>
+            <p>
+                Based on these results we will pick C = 1.0 for the SDSS datasets and C = 2.0 for the DiskWind dataset as our default values, as these are the values that look to rougly correspond with the plateau shown in figure 4. 
+                Note that in all cases the test size here was set to 30% of the data, meaning the majority of the data was exposed to the model during training. While one might assume that this is what is allowing the model to 
+                achieve such high accuracy, this is not the case. For example, if we set the test size to 0.9 (meaning only 10% of the data is used for training) the accuracy of the model (using C = 2) in the DiskWind case drops from roughly 0.91 to 0.88,
+                only a three percent decrease for a threefold decrease in the amount of training data used. For the SDSS data the drop is even less dramatic, with the accuracy dropping only roughly half a percentage point in both the data with sizes and the data without.
+                We can then generate confusion matrices for each of these datasets using these values of C and the RBF kernel, as shown below:
+            </p>
+            <div class="centerFigure3">
+                <img src="img/SVMMCMCData_kernel=rbf_C=2.0.png" alt="SVM DiskWind confusion matrix" style="width:100%">
+                <img src="img/SVMSDSS_wSizeData_kernel=rbf_C=1.0.png" alt="SVM SDSS with sizes confusion matrix" style="width:100%">
+                <img src="img/SVMSDSS_noSizeData_kernel=rbf_C=1.0.png" alt="SVM SDSS without sizes confusion matrix" style="width:100%">
+            </div>
+            <p><em>Figure 5: From left to right &mdash; confusion matrices for the DiskWind, SDSS (with sizes), and SDSS (no sizes) datasets. As mentioned above all models were fit with the RBF kernel, with C = 2.0 for the 
+                DiskWind dataset and C = 1.0 for the SDSS datasets. In all cases the test size was set to 0.3, but as discussed above this parameter does not significantly affect the results of the model for values 
+                between at least 0.1 to 0.7 (this is the range tested). 
+            </em></p>
+            <h3>Conclusions</h3>
+            <p>
+                As we can see from the confusion matrices above, SVMs do a great job of classifying data for all three datasets. These are the highest accuracies we have seen thus far for any of the models we have tested!
+                The confusion matrices are not symmetric, however, indicating that the model is better at classifying certain situations than others. For example, in the DiskWind case the model is roughly twice as likely to wrongly 
+                classify a set of input parameters as producing a single peak when they really produce a double peak than vice versa. This is interesting because the data in the DiskWind case are imbalanced, with roughly 70% of the 
+                input parameters corresponding to single peaked models, so naively one might expect the opposite to be true (i.e. misidentifying a single peak as a double peak would be more common than vice versa, simply 
+                because there are more true single peaks in the data). Since this is not the case, it implies there is a much more obvious distinction that parameters will <em>not</em> produce a double peak than there is that they will produce
+                a single peak. Also note that this imbalance in the data is the reason the correctly identified double peak fraction looks low relative to the single peak fraction &mdash; the correctly identified single peaks 
+                represent roughly 75% of the total correct identifications, which matches their relative abundance in the data. 
+            </p>
+            <p>
+                The SDSS data are balanced between the three classes of objects (stars, quasars, and galaxies), and we see that the model correctly identifies nearly all of them in both the dataset with sizes and the one without. 
+                Its interesting again to see that the size doesn't really matter, something which we've seen in previous ML methods, although here the accuracy is <em>marginally</em> better for the model trained on the data with sizes.
+                Interesting asymmetries to not here are that the model (in both cases) is much more likely to misclassify a quasar as a galaxy than vice versa, and it's also more likely to misclassify a galaxy as a star than vice versa. 
+                The first one is not surprising, as quasars are very active galaxies, and thus it makes sense that a quasar might be misclassified as a galaxy. It also makes sense that quasars are more likely to be misclassified as galaxies
+                than galaxies are to be misclassified as quasars, as quasars are galaxies with very specific properties, thus they are a subset of galaxies and so it is easier to misclassify a quasar as a galaxy than vice versa.
+                The second asymmetry is more surprising, however, as stars are very different than galaxies. One might think that this is due to very small, nearby galaxies appearing relatively similar to stars, but interestingly the 
+                model trained on the dataset with sizes actually has slightly more misclassifications of stars/galaxies than the model trained on the dataset without sizes, so it's harder to say what could be causing this asymetry. 
+                The sizes appear to help most in the case of misclassifying galaxies as quasars, as the model trained on the dataset with sizes has roughly 20% fewer of these misclassifications than the model trained on the dataset without sizes.
+                Encouragingly a very negligible (0 in one case!) amount of misclassifications happen between quasars and stars, and this is likely due to the extreme redshift of most quasars (as shown with other ML methods as well). 
+            </p>
+            <p>
+                As shown above, support vector machines are the most powerful method we have tried yet in classifying data, and they can perform with greater than 90% accuracy on all three datasets (with nearly perfect accuracy on the SDSS data). 
+                This is very encouraging, and has shown that we can use ML methods to classify astronomical data (both model and observational) with high accuracy, which is one of the primary goals of this project!
+            </p>
+            <h3>Bonus &mdash; support vector <em>regression</em> (SVR)</h3>
+            <p>
+                One of the main goals outlined in the introduction to this project was to see if we could identify not just the class of an object, but also its physical parameters. As shown in many of the previous ML methods,
+                the most important determining characteristic in the SDSS data is the redshift of an object, especially as it pertains to quasars vs. galaxies vs. stars. This is because the redshift is 
+                a proxy for the distance to an object &mdash; most individual stars are within our own galaxy and thus relatively nearby, with redshifts around zero, while galaxies are visible at further distances and thus have
+                redshifts on average between 0.1 and 1, while quasars are ultraluminous but rare galaxies visible at the farthest distances, with redshifts beyond 1. Thus, if we can identify the redshift of an object we can
+                likely identify its class. Most of the time in this project we have been working the other way around &mdash; using the redshift many of the ML methods here have been able to correctly identify the class of an object,
+                but we have not yet tried to identify the redshift of an object from its photometric quantities. Why do we want to do this? It is much easier to measure the photometric quantities of an object (and many objects at once!) than it is to measure its redshift,
+                and there is vastly more photometric data available than spectroscopic data. Thus, if we can identify the redshift of an object from its photometric quantities we can then use this to identify its class.
+                This is a regression problem, however, as we are trying to predict a continuous variable (the redshift) from a set of input parameters (the photometric quantities), and thus none of the 
+                ML methods explored thus far are appropriate for this task.
+            </p>
+            <p>
+                This is a natural extension of SVMs, where now instead of simply imposing a binary cost on misclassified points we instead impose a cost on how far away the predicted value is from the true value. Given the 
+                already high dimensionality of the SDSS data, and the fact that (as shown above) the classification performed nearly as well using a linear kernel as it did with the RBF kernel, we are going to 
+                use the linear kernel for this task as it is much faster to compute for large datasets, and there is a special implementation of SVMs for regression problems that uses the linear kernel that is optimized for speed.
+                This is simply to naively implement, as we can see in the code below:
+                <pre><code class="language-python">
+def redshiftRegression(dataFile="SVMSDSS_wSizeData.csv",testSize=0.3,extraDrop=["spectroSynFlux_i","spectroSynFlux_z","spectroSynFlux_u","spectroSynFlux_g"],C=1.0):
+    df = pd.read_csv(dataFile)
+    cols2drop = ["class"] + ["redshift"] + extraDrop #extraDrop by default drops the spectroSynFlux columns
+    X = df.drop(columns=cols2drop)
+    Y = df["redshift"]
+    Xtrain,Xtest,Ytrain,Ytest = train_test_split(X,Y,test_size=testSize)
+    clf = make_pipeline(StandardScaler(), svm.LinearSVR(C=C)) #use LinearSVR as it is better suited for large datasets
+    clf.fit(Xtrain,Ytrain)
+    Ypred = clf.predict(Xtest)
+    score = clf.score(Xtest,Ytest)
+    return [Xtrain,Xtest,Ytrain,Ytest],Ypred,score
+                </code></pre>
+                This is essentially identical to the code used to classify the SDSS data, except now we are trying to predict the redshift from the photometric quantities instead of the class. 
+                We are also dropping the spectroSynFlux columns, as these are the synthetic fluxes calculated from the spectroscopic data, and thus they are not photometric quantities.
+            </p>
+            <p>
+                Unfortunately, after running this code on our different datasets we find that SVR does not work well to predict the redshift from the photometric quantities. The \(R^2\) value for the SDSS dataset with sizes (with C = 2.0)
+                is only 0.35, and the value for the dataset without sizes is similarly 0.34. Increasing C to 10 did increase the performance, but only marginally (the number does not change to two significant figures). 
+                This means that the model is only able to explain 35% of the variance in the data, and thus it is not a good predictor of the redshift, but 
+                it is an encouraging sign because it is significantly better than random guessing (which would have an \(R^2\) value of 0). Fine tuning the linear kernel did not change the value by more than 
+                a percent, but switching to the RBF kernel implementation (i.e. using <code>svm.SVR</code> instead of <code>svm.LinearSVR</code>) yielded a 10% boost up to around 0.45. Unfortunately that's still not in the regime we would like it to be in, 
+                so we will table this for now as dedicated regression and neural network algorithms are better suited for these kinds of problems, which we will explore in the next phase of the project (and in the next two corresponding tabs).
+            </p>
+        </div>
+
+         <!-- PRETTY TABLE JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.2.1/js/bootstrap.bundle.min.js"></script>
+    <script src="js/jquery.csv.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+    <script src="js/csv_to_html_table.js"></script>
+
+    <script>
+        var CSVList = ['data/SDSS_wSize_DT_sample.csv'];
+        var idList = ['SDSS_wSize_DT_sample'];
+        // function format_link(link) {
+        //     if (link)
+        //         return "<a href='" + link + "' target='_blank'>" + link + "</a>";
+        //     else return "";
+        // }
+        for (var i = CSVList.length - 1; i >= 0; i--){
+            CSVList[i];
+            idList[i];
+            CsvToHtmlTable.init({
+                csv_path: CSVList[i],
+                element: idList[i],
+                allow_download: true,
+                csv_options: {
+                    separator: ",",
+                    delimiter: '"'
+                },
+                datatables_options: {
+                    paging: false,
+                    responsive: true,
+                    scrollCollapse: true,
+                    autowidth: true,
+                    info: true,
+                    scrollX: true,
+                    scrollY: true,
+                    searching: true
+                },
+                // custom_formatting: [
+                //     [4, format_link]
+                // ]
+            });
+        }
+    </script>
+    <!-- END PRETTY TABLE JS -->
+    </body>
 
 </html>
