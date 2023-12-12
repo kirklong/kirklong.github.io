@@ -2,9 +2,24 @@
 <html>
 <head>
     <title>Machine Learning Project</title>
+    <!-- pretty table loading -->
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=yes" name="viewport">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+    crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+    <!-- end pretty table requirements -->
+    <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
     <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link href="css/prism.css" rel="stylesheet" />
+
+
 </head>
 <body>
+    <script src="js/prism.js"></script>
     <div class="banner">
         <h1>Machine Learning Project</h1>
         <div class="tabs">
@@ -23,9 +38,332 @@
     <div class="content">
         <h2>Neural Networks</h2>
         <p>
-            Lorem Ipsum dolor...
+            For the final portion of this project, we will attempt to use a neural network to predict redshift values of stars, galaxies, and quasars based on 
+            their photometric properties alone. This is a very difficult task (as shown in previous parts), and is a good example of the kind of 
+            highly non-linear problems that neural networks are well positioned to solve.
+        </p>
+        <h3>Overview</h3>
+        <p>
+            Neural networks are a complicated and diverse topic, which we will not attempt to fully cover here. But in its simplest form, a neural network 
+            is a function that takes in some data as inputs and transforms this data into outputs. The network is composed of layers of neurons, where 
+            each neuron holds a value (usually between 0 and 1) that defines how "active" it is. The neurons in each layer are connected to each other by 
+            weights, which define how much influence a neuron in a previous layer has on a neuron in the next layer. Because each layer often introduces 
+            many more parameters than are present in the data itself, neural networks can classify and predict data in highly non-linear ways. In a 
+            sense this is similar to the principle behind SVMs, where the key idea there was that if we transformed the input data into a higher dimensional 
+            space (i.e. by using a kernel function), we could find a linear hyperplane that separates the data. The difference here is that the neural network
+            is able to learn the details of the transformation itself (by tuning its weights), and thus it can do so in a way that is not necessarily linear.
+        </p>
+        <div class="leftWrapFigure">
+            <figure>
+                <img src="img/DNN_architecture.png" alt="NN architecture" style="width:100%">
+                <figcaption>Figure 1: A simple neural network architecture. The input layer is on the left, the output layer is on the right, 
+                    and the hidden layer(s) are in the middle. The weights are represented by the lines connecting the neurons.</figcaption>
+            </figure>
+        </div>
+        <p>
+            For this reason neural networks are often considered "black boxes" &mdash; but this is a bit of a misnomer. The principles behind neural networks 
+            are really not that complicated, it's just the high dimensionality and degeneracy of the networks that make them difficult to interpret in terms of 
+            what trends they pick up on. But they don't necessarily need to be so complicated. Consider a very simple network architecture, which takes in a 
+            one dimensional input variable (x) and outputs a one dimensional output variable (y). Let's assume we want to get a linear relationship between 
+            our input and output, (i.e. and equation of the form \(y = mx + b\)). Our network architecture will then consist of a single weight (m) connecting
+            the input and output "neurons", and a bias term (b) that is added to the output. In general bias in a neural network is a constraint that controls 
+            the "activation" of the neurons in a layer (i.e. a negative bias will prevent them from being overeager). In this case, however, we simply want to 
+            impose a constraint that our network should activate most strongly when the the line it predicts is closest to the data. If we were to run this 
+            network we would start off the weight and bias values with some random values, and then we would feed in our input data and compare the model 
+            output to the actual data. We would then use this comparison to update the weights and biases, and repeat this process until the model output
+            matches the data as closely as possible. How do we update the weights and biases? We use a process called backpropagation, which is a way of
+            calculating the gradient of the loss function (i.e. the difference between the model output and the data) with respect to the weights and biases.
+            This gradient tells us how much we should change the weights and biases to make the model output closer to the data. In our simple example this would 
+            just be a matter of taking the derivative of our error with respect to m and b, and then updating their values based on this derivative, attempting to 
+            minimize the error. If we use the neural network to predict an output value continuously this is called regression, but neural networks can easily be used 
+            for classification tasks as well &mdash; in our simple example here this would neccesitate shifting the predicted value to a "hidden" layer, and adding 
+            another weight connection between this layer and the output classification (i.e. say predicted values of \(y>1\) are associated with class 1 and values 
+            of \(y<=1\) are associated with class 2, then the neural network would learn a final binary weight prediction from the predicted value to the output classification). 
+            This is a very simple example, but it illustrates the basic principles behind neural networks, and things really do work quite 
+            similarly for higher dimensions, just now we are dealing with matrices of weights and biases, and the derivatives are now really gradients 
+            on hypersurfaces. 
+        </p>
+        <p>How can we apply a neural network to our data? For this portion of the project, we will attempt to use a <em>Deep</em> Neural Network (DNN) to predict redshift values from photometric properties alone,
+            which has been one of the large overarching goals of this project. What does it mean for a neural network to be deep? It's not a well defined term,
+            and it often seems to be used as a kind of "cool" marketing gimmick for certain kinds of network architectures that are really not that deep. 
+            For example, one could imagine a complicated neural network with many convolutional and/or associated layers (i.e. dropout and pooling layers) and it might 
+            be fair to say that would represent a deep network, but the default example in i.e. the TensorFlow/Keras documentation is a much simpler network&mdash;
+            it consists of simple dense (where every neuron is connected to every other neuron) layer in between the input and output layers. This makes this kind 
+            of architecture essentially "just" a multilayer "perceptron" wrapped in fancier branding, and this is actually the kind of network architecture we will 
+            want to use on our data. A diagram of this general architecture is shown in the left figure.
+        </p>
+        <p>
+            Note that we are just going to attempt to do <em>regression</em> (we want to predict redshift values) using the SDSS dataset, as we have already 
+            accomplished our learning goals with respect to the DiskWind model dataset, and there isn't an equivalent "hard" and non-linear task 
+            for that dataset. As in previous parts of the project, we will use the photometric properties as calculated by the SDSS pipeline as our 
+            inputs and attempt to predict the redshift values as our outputs. Note that we can also directly retrieve the images of all these objects (some examples are 
+            shown in the <a href="Data.html">DataPrep/EDA</a> tab), and a future goal would be to use the images directly as inputs to a more complicated 
+            <em>convolutional</em> neural network, but this is beyond the scope of the project here. 
+        </p>
+        <h3>Data prep</h3>
+        <p>
+            The setup for our dataset is going to be very similar for what we did in SVMs &mdash; in short we need to:
+            <ol>
+                <li>Remove any columns that are not numeric or are not useful for classification, i.e. the object ID fields, the coordinate fields, and the fiber/processing fields. Basically we want to retain the photometric properties only. </li>
+                <li>Remove all of the error columns — in our original data cleaning we already used these columns to make a cut based on data quality, and we want the model to learn from the measurements themselves, not their errors. </li>
+                <li>Remove the classification column as we want to do redshift <em>regression</em> (predict the redshift values, not the object class).</li>
+                <li>Split the data into a training set and a testing set. As before we will use <code>train_test_split</code> from <a href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html">scikit-learn</a> to accomplish this with a default test set size of 30%.
+                    We will also split the training data into two futher parts: a validation and a pure training set. The validation will be used to 
+                    ensure the model is not overfitting as it trains, and we will make it 20% of the training dataset size.
+                </li>
+            </ol>
+        </p>
+        <p>
+            This is basically the same process we needed to do for SVMs, so we'll keep using that cleaned and prepped data as a basis for our neural net. A sample of the dataset that we will feed into our neural network is shown in the table below. Nate that we have kept the redshift (target variable) and 
+            class labels in this table for illustrative purposes, but they are removed from the training data itself (with the redshift data kept as the target variable
+            and the classification kept to keep track of the accuracy of the model as a function of object classification).
+        </p>
+        <div class="container-fluid">
+            <main class="row">
+                <div class="col">
+                    <div id="SDSS_wSize_DT_sample"></div>
+                </div>
+            </main>
+        </div>
+        <p>
+            We will only use the SDSS dataset with sizes in training as it is the most robust. One final thing that we need to do is to normalize the data, 
+            but we will do this as part of the neural network itself (see below).
+        </p>
+        <h3>Code</h3>
+        <p>
+            We will use the <a href="https://www.tensorflow.org/">TensorFlow</a> library to build our neural network. TensorFlow is a very powerful library for
+            machine learning, and it is used by many companies and researchers to build and train neural networks. It is also very well documented, and there are
+            many tutorials and examples available online. We will follow the <a href="https://www.tensorflow.org/tutorials/keras/regression">basic regression</a>
+            tutorial as a starting point for our network. Our network will be a DNN with multiple inputs (photometric measurements), 
+            outputting a single predicted value for the redshift. We will experiment with different numbers of hidden layers and neurons per layer to try to find 
+            the best (but simple) network architecture for our data. We will also use the <a href="https://www.tensorflow.org/api_docs/python/tf/keras/activations/relu">ReLU</a>
+            activation function for the hidden layers, and a linear activation function for the output layer. ReLU stands for "rectified linear unit", and it is 
+            a very simple activation function that is defined as \(f(x) = max(0,x)\). This means that the output of the function is zero for all negative values of
+            the input, and the output is equal to the input for all positive values of the input. Thus it is a piecewise linear function (with slope 0 for \(x<0\) and 
+            slope 1 for \(x>0\)), and it is a very common activation function for neural networks due to its computational efficiency and compatibility with 
+            gradient descent. The linear activation function for the output layer is simply \(f(x) = x\), and it is used for regression tasks (i.e. predicting a 
+            continuous value) as opposed to classification tasks (i.e. predicting a discrete value).
+        </p>
+        <p>
+            The tensorflow API makes this pretty easy to write up, i.e. a simple function to do the regression on our data looks something like:
+            <pre><code class="language-python">
+def redshiftRegression(dataFile="../SVM/SVMSDSS_wSizeData.csv",testSize=0.3,valSize=0.2,frac=1.,extraDrop=["spectroSynFlux_i","spectroSynFlux_z","spectroSynFlux_u","spectroSynFlux_g"],epochs=100,verbose=0,nPerLayer=4,nLayers=2,weightPow=2):
+    X = pd.read_csv(dataFile).sample(frac=frac)
+    cols2drop = extraDrop
+    X.drop(columns=cols2drop,inplace=True)
+    Y = X.pop("redshift")
+    Xtrain,Xtest,Ytrain,Ytest = train_test_split(X,Y,test_size=testSize)
+    Xtrain,Xval,Ytrain,Yval = train_test_split(Xtrain,Ytrain,test_size=valSize) #valSize*100% of training data for validation
+
+    train_class = Xtrain.pop("class"); test_class = Xtest.pop("class"); val_class = Xval.pop("class") #remove class column from training, test, and validation data
+
+    normalizer = layers.Normalization() #our dataframe has shape (n, features) so we want to normalize along the features axis (take mean and std of each feature)
+    normalizer.adapt(np.array(Xtrain)) #calculate mean and std of redshifts in training data
+    trainingWeights = np.power(Ytrain,weightPow) #weights for training data, higher redshifts are weighted more
+
+    model = tf.keras.Sequential([layers.Input(shape=(10,)),normalizer]) 
+    for i in range(nLayers):
+        model.add(layers.Dense(nPerLayer,activation='relu'))
+    model.add(layers.Dense(1)) #add output layer
+
+    model.compile(loss='mean_absolute_error',optimizer=tf.keras.optimizers.Adam(0.001)) #compile model with mean absolute error loss and adam optimizer
+
+    history = model.fit(Xtrain,Ytrain,verbose=verbose,epochs=epochs,validation_data=(Xval,Yval),sample_weight=trainingWeights) #fit model to data
+    Ypred = model.predict(Xtest).flatten() #predict on test data
+    err = np.mean(np.abs(Ypred-Ytest)) 
+    QSO_err = np.mean(np.abs(Ypred[test_class == "QSO"]-Ytest[test_class == "QSO"]))
+    GAL_err = np.mean(np.abs(Ypred[test_class == "GALAXY"]-Ytest[test_class == "GALAXY"]))
+    STAR_err = np.mean(np.abs(Ypred[test_class == "STAR"]-Ytest[test_class == "STAR"]))
+    return [Xtrain,Xtest,Xval,Yval,Ytrain,Ytest],[model,history,Ypred],[err,QSO_err,GAL_err,STAR_err]              
+            </code></pre>
+            As shown above, the first layer of our netowrk is an input layer, where we tell the network to expect data with ten features. 
+            Next we have a normalization layer, which as you might expect normalizes the data along the features axis (i.e. it takes the mean and 
+            standard deviation of each feature in the training data and rescales by these values). 
+            This is a very important step, as it ensures that the data from each feature is on the same scale, which is
+            necessary for the network to learn the correct weights (otherwise certain features with higher intrinsic values would be weighted more). 
+            Then we add hidden layers to the network, where each hidden layer uses the ReLU activation function described above. We keep all of these layers
+            as "dense", meaning that each neuron in a given layer is connected to every neuron in the previous layer. This is the simplest kind of neural network
+            architecture, also known as a multilayer perceptron. Finally we add an output layer, which has a single neuron and uses a linear activation function to 
+            transform from the higher dimensional space in the hidden layers down to a single dimensional number (the predicted redshift).
+            Then we compile the model using the mean absolute error as our loss function and the Adam optimizer. The loss function is what the network will try to
+            minimize as it trains, and the optimizer is the algorithm that the network will use to update its weights and biases. The Adam optimizer is a very
+            common optimizer for neural networks, and is a <a href="https://en.wikipedia.org/wiki/Stochastic_gradient_descent">stochastic gradient descent</a> method.
+            The parameter passed to the optimizer is the learning rate, which controls how quickly the network will update its weights and biases, and which 
+            we've left as the default value of 0.001 for simplicity. 
+        </p>
+        <p>
+            After the model is compiled we fit it to the training data, and then we can use it to predict the redshift values of the test data! 
+        </p>
+        <h3>Results</h3>
+        <p>Discuss, illustrate, describe, and visualize the results. Include the confusion matrix and the accuracy.  
+            Create (by hand as an image) the architecture of your NN and include the image. 
+            The architecture should include a general idea of your input and output, of your weight matrices, and of your hidden layer and units, 
+            as well as the activation function(s) used and how all the nodes/layers are connected to each other. 
+            Again, you can keep this simple (linear input, one output, one hidden layer with at least 3 units, 
+            and two activation functions - one for H and one for the output) or you can make it more complex - its up to you. 
+        </p>
+        <p>
+            First we ran a parameter sweep of the number of hidden layers, the number of nuerons in each of those hidden layers, and how strongly to bias 
+            the model towards fitting high redshift objects. The results of this parameter survey are shown in the plot below:
+        </p>
+        <div class="centerFigure1">
+            <figure>
+                <img src="img/param_sweep.png" alt="NN parameter sweep" style="width:100%">
+                <figcaption>Figure 2: Results of our parameter sweep in three panels. The y-axis in each encodes the average redshift error. To generate each of these results each model was only trained for 10 epochs as this was found to correspond with the most dramatic changes in the loss. 
+                </figcaption>
+            </figure>
+        </div>
+        <div class="leftWrapFigure">
+            <img src="img/training_loss.png" alt="NN loss" style="width:100%">
+            <figcaption>Figure 3: Training loss as a function of epoch number &mdash; zero is 
+                what we want here, and we can see that the model learns a lot initially and then tapers off, but it is still learning even after 500 epochs and performance 
+                could likely still be improved by training for longer (although perhaps only marginally so). 
+            </figcaption>
+        </div>
+        <p>
+            Based on the plot above, we can see that increasing the number of hidden layers and number of neurons per hidden layer in general seems to make the 
+            average error decrease slightly, but not as much as you might have expected. The third panel shows what happens if we wait high redshift samples more &mdash; as expected this makes the 
+            average accuracy for the the high redshift objects better, but it also makes the accuracy for the low redshift objects worse, thus the error in 
+            stars explodes. A better approach here might have been to try making the weights go something like \(w = 1 + \frac{z}{z_\rm{max}}\) as then the possible 
+            range for the weights would have been much tighter (in the case of the \(w\propto z^2\) the range is effectively 0 for most stars to 50 for high z quasars).
+            Perhaps we will explore this in the future, but for the sake of saving precious time at the end of the semester we leave this as a future exercise.
+        </p>
+        <p>
+            Based on these results we will (somewhat arbitrarily) use four hidden layers with 128 neurons in each layer and a weight parameter of 0 (no bias towards 
+            high redshift objects) for our network which we will train for 500 epochs. After creating, training, and testing the model, we can visualize its results with the help of the figures at left/below.
+        </p>
+        <p>
+            As shown in Figure 3, the model is able to learn the data pretty well, with a mean absolute error converging to roughly 0.19 after 500 epochs. To train the 
+            model for this long on the dataset represents a computational cost of a few hours on my laptop. Fortunately this is a cost we only need to pay once, 
+            and there are also ways to speed up the training process (i.e. by distributing computations to GPUs or multiple CPUs). 
+        </p>
+        <p>
+            How does the model perform as a function of input parameter and object type? Figure 4 above shows the predicted redshift values as a function of the 
+            photometric input parameters for the test set, with the color of each point indicating what type of object it is. 
+            The black points indicate what the model thinks the redshift for the each point in the test set is, and area where color bleeds through are thus 
+            regions where the model was not able to capture the data fully. Interestingly we can immediately see that the model never predicts a redshift of 
+            higher than roughly 4 for any object. The size information is harder to sus out as the spikes there are likely outliers we probably should have removed 
+            (but didn't notice until now!). While the general morphology of each of the photometric band distributions is matched decently well, two 
+            other interesting features stick out in the data. The first is that there appears to be a gap in accuracy for redshifts between 3-3.5, which is most pronounced in the u, 
+            g, and z bands but visible in all imaging bands. This indicates that there is something attracting the model to either side of this gap, as there is plenty of data in this region it 
+            could have learned from (although this is the testing data which the model did not train on the distribution of the training data is similar). The second 
+            is that there appears to be an oscillatory type behavior near the edges of the data, which is especially more pronounced for brighter magnitude inputs, indicating 
+            the model is unsure about how to classify them but in some kind of periodic way which is interesting. 
+        </p>
+        <div class="centerFigure1">
+            <img src="img/predict_by_param.png" alt="NN predictions by parameter" style="width:100%">
+            <figcpation>Figure 4: Predicted redshift values as a 
+                function of the photometric input parameters, with the color of each point indicating what type of object it is. The black points indicate what the model 
+                predicts for each point, and areas where color bleeds through are thus regions of parameter space the model was not able to capture fully. 
+            </figcpation>
+        </div>
+        <div class="leftWrapFigure">
+            <img src="img/predicted_vs_true_redshift.png" alt="NN predicted vs true redshift" style="width:100%">
+            <figcaption>Figure 5: Predicted vs true redshifts in the test set,
+                with color corresponding to the object type. 
+                The farther off from the black line (the 1:1 line of perfect theoretical accuracy), the worse the model performs in that region.</figcaption>
+        </div>
+        <p>While we can't make a confusion matrix for this since we are predicting redshift values and not classifying objects, we can look at the distribution of 
+            our data and our model's predictions, which is visualized in the plot above. The farther off from the black line (the 1:1 line of perfect theoretical accuracy), 
+            the worse the model performs in that region. At low redshifts everything is a mess, but this is okay as this is actually kind of what we expect from physics 
+            and previous machine learning results, given that really what most of these methods have picked up on is Hubble's law, which tells us that the redshift is a 
+            proxy for the distance, and in the local universe this picture is a lot fuzzier than it is at cosmological scales. Also, at cosmological scales all of these 
+            objects are effectively point sources, and thus the total photometric properties are basically everything we could measure about a source, whereas in the 
+            local universe we can actually resolve at least some of these objects and thus there are both more properties that could define them and simultaneously 
+            accurately measuring the total integrated properties is harder. It's interesting that the model appears to perform best at redshifts of roughly 4, and also that 
+            it doesn't predict redshifts higher than this. This is likely because the model has learned that the data is sparse at these redshifts, and thus we should 
+            revisit the weighting scheme discussed earlier to see if this can improve this performance without totally ruining the accuracy in the local universe. 
+            We also see why quasars get their name ("quasi stellar radio sources"), in that there are two stripes along the axes &mdash; one in red and one in gold &mdash; corresponding to stars given 
+            way too high of redshifts and quasars given way too low of redshifts. Finally, it's intriguing that there is a small gap of white space by redshifts of 2,
+            indicating that the model was roughly following the 1:1 line for quasars until this point, then got confused by something and filled in the space farther 
+            away from the 1:1 line before returning to (mostly) better accuracies at higher redshifts. This is roughly the same region as the "gap" that was identified 
+            in the previous figure, so this is another hint that there is something interesting going on here.
+        </p>
+        <p>
+            Finally, how did the model score in terms of quantitative accuracy metrics? Overall we were able to achieve (with just this very simple network) a mean absolute error of 0.2 across
+            all objects, with a mean absolute error of 0.41 for quasars, 0.061 for galaxies, and 0.14 for stars. The average redshifts for quasars in our sample is 1.7, 
+            the average galaxy is at a redshift of about 0.35, and the average redshift of a star is roughly 0.0. Thus for quasars and galaxies the mean percent accuracy is 
+            roughly 83% (while for stars it is much higher because the redshifts are so low). We can also calculate the \(R^2\) score for our model, which is roughly 
+            0.6 for all objects. This means our simple neural network is able to explain about 60% of the variance in the data, which is not bad for such a simple model, and 
+            a solid 20-30% higher than the SVM regression we tried previously. 
+        </p>
+        <h3>Conclusions</h3>
+        <p>
+            We've shown that a very simple neural network and some very simple data can indeed be used to (roughly) predict the redshifts of different kinds of objects, 
+            and that the regression can segregate the data into distinct classes in line with what we would expect from our physical priors (i.e. that stars are on average 
+            closer, galaxies a little farther, and quasars the farthest away). This was the original goal of the project, and while we could probably still do a little better
+            with more sophisticated models, we have shown that this is definitely possible, with this simple model explaining more than half of the variance in the data and 
+            performing 20-30% better than any of the other methods we have tried. 
+        </p>
+        <p>
+            Future directions / suggestions for improvements include:
+            <ul>
+                <li>Using the images directly as inputs to a convolutional neural network. This would likely improve the accuracy of the model, but it would also 
+                    require a lot more computational power and time to train the model. Side note: we did actually try a (very simple) version of this using a convolutional neural network on image cutouts downloaded from the SDSS database, 
+                but it only worked roughly 5% better than random guessing. This is because many of the objects look very faint/small in the imaging, and there's a lot of extra stuff in space surrounding them,
+                thus it was hard to both cut out the images consistently to only include the target and identify images of suitable targets / stretch the image in such a way that the target was always visible. </li>
+                <li>Using a more sophisticated weighting scheme to bias the model towards high redshift objects. This would likely improve the accuracy of the model, 
+                    as we already showed we could indeed increase the quasar accuracy significantly by doing this (but at the cost of everything else). </li>
+                <li>Using a more sophisticated network architecture, i.e. by including convolutional, sparse, dropout, dropout, etc. layers. </li>
+                <li>Using a different/more sophisticated loss function. This could improve the accuracy of the model, 
+                    but it would also likely impose a significant computational penalty in training the model. </li>
+                <li>Likewise we could try different optimizers and different learning rates as part of our parameter sweep to see if these hyperparameters affect the model performance. </li>
+                <li>Using a more sophisticated training scheme, i.e. using a learning rate scheduler, where the learning rate is not simply constant across all the training epochs. </li>
+                <li>Seeing if (just for fun) a neural network could identify the redshift from the input spectra alone. This wouldn't really have any practical benefit (as the 
+                    motivation for predicting redshift from photometric properties is that it's much easier to take pictures than it is spectra) but it would be a fun exercise 
+                    to see if the model can learn to identify the patterns of spectral lines and their shifts relative to each other. This could also be a classification 
+                    exercise based on the spectra, i.e. after seeing a spectrum can the network correctly predict whether the associated object is a star, galaxy, or quasar, or 
+                    even subtypes within those classes? 
+                </li>
+            </ul>
         </p>
     </div>
+
+
+    <!-- PRETTY TABLE JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.2.1/js/bootstrap.bundle.min.js"></script>
+    <script src="js/jquery.csv.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+    <script src="js/csv_to_html_table.js"></script>
+
+    <script>
+        var CSVList = ['data/SDSS_wSize_DT_sample.csv'];
+        var idList = ['SDSS_wSize_DT_sample'];
+        // function format_link(link) {
+        //     if (link)
+        //         return "<a href='" + link + "' target='_blank'>" + link + "</a>";
+        //     else return "";
+        // }
+        for (var i = CSVList.length - 1; i >= 0; i--){
+            CSVList[i];
+            idList[i];
+            CsvToHtmlTable.init({
+                csv_path: CSVList[i],
+                element: idList[i],
+                allow_download: true,
+                csv_options: {
+                    separator: ",",
+                    delimiter: '"'
+                },
+                datatables_options: {
+                    paging: false,
+                    responsive: true,
+                    scrollCollapse: true,
+                    autowidth: true,
+                    info: true,
+                    scrollX: true,
+                    scrollY: true,
+                    searching: true
+                },
+                // custom_formatting: [
+                //     [4, format_link]
+                // ]
+            });
+        }
+    </script>
+    <!-- END PRETTY TABLE JS -->
 </body>
 
 </html>

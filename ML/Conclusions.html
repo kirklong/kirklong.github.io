@@ -23,7 +23,80 @@
     <div class="content">
         <h2>Conclusions</h2>
         <p>
-            Lorem Ipsum dolor...
+            Throughout this project we have applied 10 different machine learning algorithms to observational data from the Sloan Digital Sky Survey as well as 
+            simulated data from a custom broad-line region modelling suite. Below are a few overarching takeaways from the project:
+        </p>
+        <h3>Unsupervised learning is a powerful tool for discovery</h3>
+        <p>
+            Each of the unsupervised methods tried (k-means and hierarchical clustering + association rule mining) were able to identify interesting trends in the data
+            that were both expected and unexpected, as well as providing a quantitative basis for the kinds of things we might be able to further explore with 
+            supervised learning methods. In the SDSS data, for example, clustering methods showed us that there were correlations between redshift and photometric fluxes, which 
+            were physically justified as the redshift of a galaxy is directly related to its distance from us, and the further away a galaxy is, the dimmer and redder it appears.
+            They also confirmed that quasars and galaxies are much more similar (and harder to split into distinct clusters) in the parameter space than stars are, as expected.
+            ARM provided similar results, showing that quasars are on average farther away than stars and galaxies as expected. 
+            However, clustering methods also provided a warning sign (not fully realized until the neural network was attempted) that the sizes in the data were not as reliable / useful
+            as one might hope, as they were more strongly associated with spectral fluxes rather than imaging fluxes, which is problematic given that we know that they were 
+            derived from the imaging fluxes in the SDSS pipeline. A similarly surprising result from ARM similarly showed surprising assocations between sizes and spectroscopic brightness
+            which are likely not physical. A more interesting and surprising result from ARM was that there was no strong association between which spectroscopic band was brightest 
+            and the class of object, which is somewhat surprising given that quasars, galaxies, and stars all have very different spectral profiles, and a very useful finding 
+            for the design and interpretation of supervised learning models throughout the rest of the project.
+        </p>
+        <p>
+            In the simulated data, clustering methods indicated that the mean model size and mass were the most important system-wide parameters of the model, while the 
+            inclination, FWHM, radial scaling, source function scaling, position angle, and wind terms were most important in generating the shape of the line profiles. 
+            ARM validated this as well, showing that inclination and certain wind terms were more likely to produce lines with single peaks. This was 
+            expected but still useful to confirm, but unexpectedly clustering implied that the mass and radial scaling factors are degenerate with the size of the system,
+            which is important given that the size of the system is usually something that is actually measured in real data and then used to constrain a mass, but here clustering 
+            indicated that there is a significant model-dependent uncertainty in the mass you can thus back out from such a measurement.
+        </p>
+        <p>
+            Overall, unsupervised learning methods were able to provide a lot of useful information about the data, and in some cases even provided some unexpected results 
+            that were useful to know about. They also provided a quantitative basis for the kinds of things we might be able to further explore with supervised learning methods, 
+            and conversely provided a useful warning sign about what we should <em>not</em> expect to be able to show with our data. ARM was the "coolest" method to learn about 
+            as the simple and strong statistical foundation of the method made it easy to understand, interpret, trust, and apply to the data.
+        </p>
+        <h3>Supervised learning is a powerful tool for prediction <em>and</em> discovery</h3>
+        <p>
+            Each of the supervised learning methods tried (decision trees + random forests, naive bayes, support vector machines, and neural networks) were able to
+            successfully classify all of the datasets with surprisingly high accuracy. The worst performing classification model was the naive bayes 
+            classifier, which for the DiskWind simulated dataset still achieved an overall accuracy of 77%. The best performing classification model was 
+            the random forest classifier, which achieved an overall accuracy of 94% for the DiskWind dataset, and 99% for both SDSS datasets. SVMs 
+            were a close second, coming in at 91% for the DiskWind dataset and 98% for both SDSS datasets, identical results to what was obtained from a single decision tree classifier.
+        </p>
+        <p>
+            While supervised learning is often just employed for regression or classification, it also is a powerful discovery tool. For example, perhaps the coolest 
+            feature of the random forest classifier is that it can tell you which features are most important in making its classification decisions. For the SDSS data,
+            this illustrated that the redshift was by far the most important feature in predicting the class of an object. Given that, you would think that taking it away 
+            from the model would drastically hurt the accuracy, but as the unsupervised methods showed there are correlations between redshift and other photometric parameters 
+            thus when hiding the redshift from the random forest classifier the accuracy only dropped about 5%! 
+        </p>
+        <p>
+            With SVMs and neural networks, we were finally able to attempt to predict the redshift of the SDSS data from photometric inputs alone, a goal outlined 
+            in the introduction of the project and strongly motivated by the associations found in the unsupervised learning methods. Unfortunately with SVMs and a linear classifier 
+            we were able to get to an R-squared value of roughly 0.35, which is pretty bad, and changing to a much higher dimensional rbf kernel only improved this result by about 0.1.
+            Fortunately, neural networks were able to do much better, achieving an R-squared value of roughly 0.6, with an average error of roughly 0.2 in the redshift. 
+            This is pretty bad in the local universe where redshifts are typically less than 0.1, but is actually pretty good for the high redshift. The error in the classes 
+            was not symmetrical here, with quasars getting an average error of 0.4, galaxies 0.06, and stars 0.14. This is somewhat surprising as naively you might expect 
+            that stars would be the easiest to predict, but here they were actually the hardest in terms of their actual redshifts (which are basically zero). 
+        </p>
+        <h3>Data preparation/cleaning is very important</h3>
+        <p>
+            For each of these methods, the exact data cleaning and preparation procedures were highly tailored to the method being used, and in many cases the data 
+            were transformed in some way to make them more useful for a specific algorithm. We often normalized, rebinned, dropped columns, etc. from the data 
+            to make them work for each method, and these choices really matter. For example, in the Naive Bayes classifier we essentially need to input histograms for 
+            each feature in the data, and the number of bins you use when making these histograms can drastically change the accuracy of the model (we observed a 30% change 
+            over a factor of 100 bins). Similarly, if you don't normalize the data before using many of the supervised learning methods presented here the 
+            results can be skewed by the fact that some features have much larger ranges than others. Finally, as noticed particularly with the DiskWind dataset,
+            how your data is split among the classes will also affect the model's performance, and if the classes are not balanced you may need to correct for this 
+            (either by using weights or by undersampling the larger classes).
+        </p>
+        <h3>Final thoughts</h3>
+        <p>Many of the methodologies presented here were unfamiliar at the start of the course, but all of them have taught us something interesting about 
+            both machine learning as a field and the data we applied them to. Perhaps most impressive are the random forests, which have powerful predictive 
+            and discovery capabilities, and will be a go-to method for future projects as a first step before implementing more complicated methods (like fancy 
+            neural nets). We were able to successfully answer most of the questions posed in the introduction to the project, and have a good start 
+            on the others. We were able to successfully classify the SDSS and DiskWind data with high accuracy, and were able to predict the redshifts of the SDSS data
+            from photometric inputs with a very simple neural network reasonably well. Ad astra per aspera!
         </p>
     </div>
 </body>
