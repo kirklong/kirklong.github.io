@@ -53,26 +53,10 @@ $('.map').on('mouseleave', function(){
 
 //==============___Scrollbars___================
 // Only use Perfect Scrollbar on non-touch devices (desktop)
-if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+// Skip on blog post pages so iframes (YouTube embeds) remain clickable
+if (!('ontouchstart' in window || navigator.maxTouchPoints > 0) && !$('.blog-single-post').length) {
   $('.section-vcardbody').perfectScrollbar({
     wheelSpeed: 0.9
-  });
-
-  // Wrap iframes with a scroll overlay so wheel events reach Perfect Scrollbar
-  // (same pattern as .map-overlay above)
-  $('.section-vcardbody iframe').each(function() {
-    var $iframe = $(this);
-    $iframe.wrap('<div class="iframe-scroll-wrapper" style="position:relative;"></div>');
-    var $overlay = $('<div class="iframe-scroll-overlay"></div>');
-    $iframe.parent().append($overlay);
-
-    $overlay.on('click', function() {
-      $(this).hide();
-    });
-
-    $iframe.parent().on('mouseleave', function() {
-      $overlay.show();
-    });
   });
 }
 

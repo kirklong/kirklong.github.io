@@ -194,16 +194,6 @@ a:focus {
 iframe {
   width: 100%;
 }
-.iframe-scroll-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-  background: transparent;
-  cursor: pointer;
-}
 .btn-fluid {
   width: 100%;
 }
