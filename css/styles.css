@@ -449,8 +449,7 @@ iframe {
 }
 @media (hover: none) and (pointer: coarse) {
   .section-vcardbody {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
+    overflow-y: visible !important;
   }
 }
 .section-vcardbody-pgactive {
